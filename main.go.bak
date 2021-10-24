@@ -1,0 +1,176 @@
+package main
+
+import (
+	"fmt"
+	"log"
+	"os/exec"
+
+	"github.com/jiuncheng/archinstall2/disklist"
+)
+
+var (
+	installDisk string
+)
+
+func main() {
+	cmd := exec.Command("lsblk", "-ldnJe", "7,11")
+	res, err := cmd.Output()
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	dl, err := disklist.NewDiskListFromJSON(res)
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	var result int
+	for {
+		for i, disk := range dl.BlockDevices {
+			fmt.Printf("%d.    /dev/%s    %s\n", i+1, disk.Name, disk.Size)
+		}
+		fmt.Println("\n Please select the number which the disk will be used for installation (e.g. 3): ")
+
+		_, err = fmt.Scan(&result)
+		if err == nil {
+			break
+		}
+		fmt.Println("\n\nOnly number is allowed.")
+	}
+
+	installDisk = "/dev/" + dl.BlockDevices[result-1].Name
+
+	fmt.Println("\nFormatting selected disk...")
+	cmd = exec.Command("sgdisk", "-o", installDisk)
+	err = cmd.Run()
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	cmd = exec.Command("sgdisk", "-n", "1:0:+500M", "-t", "1:ef00", "-c", "1:'EFI'", installDisk)
+	err = cmd.Run()
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	cmd = exec.Command("sgdisk", "-n", "2:0:-4G", "-t", "2:8300", "-c", "2:'rootfs'", installDisk)
+	err = cmd.Run()
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	cmd = exec.Command("mkfs.vfat", "-n", "EFI", installDisk+"1")
+	err = cmd.Run()
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	cmd = exec.Command("mkfs.btrfs", "-f", "-L", "ROOT", installDisk+"2")
+	err = cmd.Run()
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	cmd = exec.Command("mkfs.btrfs", "-f", "-L", "ROOT", installDisk+"2")
+	err = cmd.Run()
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	fmt.Println("\nMounting disk for btrfs subvolume creation...")
+	cmd = exec.Command("mount", installDisk+"2", "/mnt")
+	err = cmd.Run()
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	cmd = exec.Command("btrfs", "subvolume", "create", "/mnt/@")
+	err = cmd.Run()
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	cmd = exec.Command("btrfs", "subvolume", "create", "/mnt/@home")
+	err = cmd.Run()
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	cmd = exec.Command("btrfs", "subvolume", "create", "/mnt/@snapshots")
+	err = cmd.Run()
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	cmd = exec.Command("btrfs", "subvolume", "create", "/mnt/@var_log")
+	err = cmd.Run()
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	fmt.Println("\nUnmounting disk for remounting with BTRFS options")
+	cmd = exec.Command("umount", "/mnt")
+	err = cmd.Run()
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	fmt.Println("\nRemounting with BTRFS options")
+	cmd = exec.Command("mount", "-o", "noatime,compress=zstd,space_cache,discard=async,subvol=@", installDisk+"2", "/mnt")
+	err = cmd.Run()
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	cmd = exec.Command("mkdir", "-p", "/mnt/{boot,home,var,.snapshots}")
+	err = cmd.Run()
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	cmd = exec.Command("mkdir", "-p", "/mnt/var/log")
+	err = cmd.Run()
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	cmd = exec.Command("mount", "-o", "noatime,compress=zstd,space_cache,discard=async,subvol=@home", installDisk+"2", "/mnt/home")
+	err = cmd.Run()
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	cmd = exec.Command("mount", "-o", "noatime,compress=zstd,space_cache,discard=async,subvol=@snapshots", installDisk+"2", "/mnt/.snapshots")
+	err = cmd.Run()
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	cmd = exec.Command("mount", "-o", "noatime,compress=zstd,space_cache,discard=async,subvol=@var_log", installDisk+"2", "/mnt/var/log")
+	err = cmd.Run()
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	fmt.Println("\nMounting EFI /boot...")
+	cmd = exec.Command("mount", installDisk+"1")
+	err = cmd.Run()
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	fmt.Println("\nDownloading packages from Pacstrap...")
+	cmd = exec.Command("pacstrap", "-i", "/mnt", "base base-devel linux linux-firmware intel-ucode git neovim btrfs-progs")
+	err = cmd.Run()
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	cmd = exec.Command("genfstab", "-U", "/mnt", ">>", "/mnt/etc/fstab")
+	err = cmd.Run()
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	fmt.Println(installDisk)
+}
