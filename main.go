@@ -3,138 +3,49 @@ package main
 import (
 	"fmt"
 	"log"
-	"os/exec"
 
 	"github.com/jiuncheng/archinstall2/cmd"
 	"github.com/jiuncheng/archinstall2/disklist"
-)
-
-var (
-	installDisk string
+	"github.com/jiuncheng/archinstall2/diskutil"
+	"github.com/jiuncheng/archinstall2/filesystem"
+	"github.com/jiuncheng/archinstall2/sysconfig"
 )
 
 func main() {
-	command := exec.Command("lsblk", "-ldnJe", "7,11")
-	res, err := command.Output()
-	if err != nil {
-		log.Fatalln(err.Error())
-	}
+	cfg := sysconfig.NewSysConfig()
 
-	dl, err := disklist.NewDiskListFromJSON(res)
+	dl, err := disklist.GetDiskList()
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
 
 	var result int
 	for {
-		for i, disk := range dl.BlockDevices {
+		for i, disk := range dl {
 			fmt.Printf("%d.    /dev/%s    %s\n", i+1, disk.Name, disk.Size)
 		}
-		fmt.Println("\n Please select the number which the disk will be used for installation (e.g. 3): ")
+		fmt.Print("\n Please select the number which the disk will be used for installation (e.g. 1): ")
 
-		_, err = fmt.Scan(&result)
+		_, err = fmt.Scanf("%d", &result)
 		if err == nil {
-			break
+			if result <= len(dl) && result > 0 {
+				break
+			}
+			fmt.Println("\n\nThe number must be between 1 and ", len(dl), ".")
+			fmt.Print("Press enter to choose again : ")
+			fmt.Scanln()
+			continue
 		}
-		fmt.Println("\n\nOnly number is allowed.")
+		fmt.Println("\n\nOnly number between 1 and ", len(dl), " is allowed.")
 	}
 
-	installDisk = "/dev/" + dl.BlockDevices[result-1].Name
+	cfg.InstallDisk = "/dev/" + dl[result-1].Name
 
-	err = cmd.NewCmd("sgdisk -o " + installDisk).SetDesc("Formatting selected disk...").Run()
+	err = diskutil.NewDiskUtil(cfg).CreateBTRFS()
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
-
-	err = cmd.NewCmd("sgdisk -n 1:0+500M -t 1:ef00 -c 1:'EFI' " + installDisk).Run()
-	if err != nil {
-		log.Fatalln(err.Error())
-	}
-
-	err = cmd.NewCmd("sgdisk -n 2:0:-4G -t 2:8300 -c 2:'rootfs' " + installDisk).Run()
-	if err != nil {
-		log.Fatalln(err.Error())
-	}
-
-	err = cmd.NewCmd("mkfs.vfat -n EFI " + installDisk + "1").Run()
-	if err != nil {
-		log.Fatalln(err.Error())
-	}
-
-	err = cmd.NewCmd("mkfs.btrfs -f -L ROOT " + installDisk + "2").Run()
-	if err != nil {
-		log.Fatalln(err.Error())
-	}
-
-	err = cmd.NewCmd("mkfs.btrfs -f -L ROOT " + installDisk + "2").Run()
-	if err != nil {
-		log.Fatalln(err.Error())
-	}
-
-	err = cmd.NewCmd("mount " + installDisk + "2" + " /mnt").SetDesc("Mounting disk for btrfs subvolume creation...").Run()
-	if err != nil {
-		log.Fatalln(err.Error())
-	}
-
-	err = cmd.NewCmd("btrfs subvolume create /mnt/@").Run()
-	if err != nil {
-		log.Fatalln(err.Error())
-	}
-
-	err = cmd.NewCmd("btrfs subvolume create /mnt/@home").Run()
-	if err != nil {
-		log.Fatalln(err.Error())
-	}
-
-	err = cmd.NewCmd("btrfs subvolume create /mnt/@snapshots").Run()
-	if err != nil {
-		log.Fatalln(err.Error())
-	}
-
-	err = cmd.NewCmd("btrfs subvolume create /mnt/@var_log").Run()
-	if err != nil {
-		log.Fatalln(err.Error())
-	}
-
-	err = cmd.NewCmd("umount /mnt").SetDesc("Unmounting disk for remounting with BTRFS options...").Run()
-	if err != nil {
-		log.Fatalln(err.Error())
-	}
-
-	err = cmd.NewCmd("mount -o noatime,compress=zstd,space_cache,discard=async,subvol=@ " + installDisk + "2" + " /mnt").SetDesc("Remounting with BTRFS options...").Run()
-	if err != nil {
-		log.Fatalln(err.Error())
-	}
-
-	err = cmd.NewCmd("mkdir -p /mnt/boot /mnt/home /mnt/var /mnt/.snapshots").Run()
-	if err != nil {
-		log.Fatalln(err.Error())
-	}
-
-	err = cmd.NewCmd("mkdir -p /mnt/var/log").Run()
-	if err != nil {
-		log.Fatalln(err.Error())
-	}
-
-	err = cmd.NewCmd("mount -o noatime,compress=zstd,space_cache,discard=async,subvol=@home " + installDisk + "2" + " /mnt/home").Run()
-	if err != nil {
-		log.Fatalln(err.Error())
-	}
-
-	err = cmd.NewCmd("mount -o noatime,compress=zstd,space_cache,discard=async,subvol=@snapshots " + installDisk + "2" + " /mnt/.snapshots").Run()
-	if err != nil {
-		log.Fatalln(err.Error())
-	}
-
-	err = cmd.NewCmd("mount -o noatime,compress=zstd,space_cache,discard=async,subvol=@var_log " + installDisk + "2" + " /mnt/var/log").Run()
-	if err != nil {
-		log.Fatalln(err.Error())
-	}
-
-	err = cmd.NewCmd("mount " + installDisk + "1" + " /mnt/boot").SetDesc("Mounting EFI /boot...").Run()
-	if err != nil {
-		log.Fatalln(err.Error())
-	}
+	filesystem.NewBtrfsHelper(cfg).GenerateBTRFSSystem()
 
 	cmd2 := cmd.NewCmd("pacstrap /mnt base base-devel linux linux-firmware intel-ucode git neovim nano btrfs-progs")
 	err = cmd2.SetDesc("Downloading packages from Pacstrap...").Run()
@@ -162,7 +73,7 @@ func main() {
 		log.Fatalln(err.Error())
 	}
 
-	err = cmd.NewCmd("arch-chroot /mnt sed -i '177s/.//' /etc/locale.gen").SetDesc("Generating en_US_utf-8 locale...").Run()
+	err = cmd.NewCmd("arch-chroot /mnt sed -i s/^#*\\(en_US.UTF-8\\)/\\1/ /etc/locale.gen").SetDesc("Generating en_US_utf-8 locale...").Run()
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
@@ -210,5 +121,11 @@ func main() {
 		log.Fatalln(err.Error())
 	}
 
+	err = cmd.NewCmd("useradd -mG wheel -s /bin/bash -p 12345 home3").Run()
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	// fmt.Println(cfg.InstallDisk)
 	fmt.Println("Installation done. You will now be able to reboot.")
 }

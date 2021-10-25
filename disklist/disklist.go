@@ -1,6 +1,10 @@
 package disklist
 
-import "encoding/json"
+import (
+	"encoding/json"
+
+	"github.com/jiuncheng/archinstall2/cmd"
+)
 
 type DiskList struct {
 	BlockDevices []Disk `json:"blockdevices"`
@@ -16,15 +20,25 @@ type Disk struct {
 	MountPoints []string `json:"mountpoints"`
 }
 
-func NewDiskList() *DiskList {
-	return &DiskList{}
-}
+func NewDiskList() (*DiskList, error) {
+	output, err := cmd.NewCmd("lsblk -ldnJe 7,11").Output()
+	if err != nil {
+		return nil, err
+	}
 
-func NewDiskListFromJSON(input []byte) (*DiskList, error) {
 	var newDL DiskList
-	err := json.Unmarshal(input, &newDL)
+	err = json.Unmarshal(output, &newDL)
 	if err != nil {
 		return nil, err
 	}
 	return &newDL, nil
+}
+
+func GetDiskList() ([]Disk, error) {
+	dl, err := NewDiskList()
+	if err != nil {
+		return nil, err
+	}
+
+	return dl.BlockDevices, nil
 }

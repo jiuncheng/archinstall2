@@ -1,7 +1,11 @@
 package cmd
 
 import (
+	"bytes"
 	"fmt"
+	"io"
+	"log"
+	"os"
 	"os/exec"
 	"strings"
 )
@@ -36,11 +40,50 @@ func (c *Command) SetDesc(desc string) *Command {
 }
 
 func (c *Command) Run() error {
+	// args := strings.Split(c.args, " ")
+	args := strings.Fields(c.args)
+
+	fmt.Printf("\n%s\n", c.desc)
+	fmt.Printf("Executing command : %s\n", c.args)
+
+	for _, arg := range args {
+		log.Println(arg)
+	}
+
+	var cmd *exec.Cmd
+	if len(args) < 2 {
+		cmd = exec.Command(args[0])
+	} else {
+		cmd = exec.Command(args[0], args[1:]...)
+	}
+
+	var stdoutBuf, stderrBuf bytes.Buffer
+	cmd.Stdout = io.MultiWriter(os.Stdout, &stdoutBuf)
+	cmd.Stderr = io.MultiWriter(os.Stderr, &stderrBuf)
+
+	err := cmd.Run()
+	outStr, errStr := stdoutBuf.String(), stderrBuf.String()
+	fmt.Printf("\n%s\n%s\n", outStr, errStr)
+	log.Println("Operation done.")
+	return err
+
+	// output, err := cmd.CombinedOutput()
+	// fmt.Println(string(output))
+	// log.Println("Operation done.")
+	// return err
+}
+
+func (c *Command) Output() ([]byte, error) {
 	args := strings.Split(c.args, " ")
 
 	fmt.Printf("\n%s\n", c.desc)
 	fmt.Printf("\nExecuting command : %s\n", c.args)
 
-	cmd := exec.Command(args[0], args...)
-	return cmd.Run()
+	var cmd *exec.Cmd
+	if len(args) < 2 {
+		cmd = exec.Command(args[0])
+	} else {
+		cmd = exec.Command(args[0], args[1:]...)
+	}
+	return cmd.Output()
 }
