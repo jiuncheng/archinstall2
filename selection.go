@@ -26,6 +26,8 @@ func (s *Selection) PerformSelection() error {
 	}
 	s.FileSystemSelection()
 	s.HostnameSelection()
+	s.SuperUserSelection()
+	s.OptionalUserSelection()
 
 	return nil
 }
