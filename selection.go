@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os/exec"
+	"strings"
 
 	"github.com/jiuncheng/archinstall2/disklist"
 	"github.com/jiuncheng/archinstall2/sysconfig"
@@ -24,6 +25,7 @@ func (s *Selection) PerformSelection() error {
 		return err
 	}
 	s.FileSystemSelection()
+	s.HostnameSelection()
 
 	return nil
 }
@@ -71,8 +73,8 @@ func (s *Selection) LayoutSelection() error {
 		var res string
 		fmt.Scanln(&res)
 
-		if res == "us" || res == "" {
-			s.cfg.KBLayout = res
+		if strings.TrimSpace(res) == "us" || strings.TrimSpace(res) == "" {
+			s.cfg.KBLayout = strings.TrimSpace(res)
 			return nil
 		}
 
@@ -82,7 +84,7 @@ func (s *Selection) LayoutSelection() error {
 			fmt.Scanln()
 			continue
 		}
-		s.cfg.KBLayout = res
+		s.cfg.KBLayout = strings.TrimSpace(res)
 		return nil
 	}
 }
@@ -93,14 +95,14 @@ func (s *Selection) FileSystemSelection() {
 		fmt.Println("----FILESYSTEM-----")
 		fmt.Println("1. btrfs")
 		fmt.Println("2. ext4")
-		fmt.Print("Choose the filesystem for main partition : ")
+		fmt.Print("Choose the filesystem for main partition (default: btrfs) : ")
 
 		var res string
 		fmt.Scanln(&res)
-		if res == "1" {
+		if strings.TrimSpace(res) == "1" || strings.TrimSpace(res) == "" {
 			s.cfg.FS = "btrfs"
 			return
-		} else if res == "2" {
+		} else if strings.TrimSpace(res) == "2" {
 			s.cfg.FS = "ext4"
 			return
 		}
@@ -109,6 +111,19 @@ func (s *Selection) FileSystemSelection() {
 		fmt.Scanln()
 		continue
 	}
+}
+
+func (s *Selection) HostnameSelection() {
+	fmt.Print("\n\n")
+	fmt.Print("Enter desired hostname for installation (default: archlinux) : ")
+
+	var res string
+	fmt.Scanln(&res)
+	if strings.TrimSpace(res) == "" {
+		s.cfg.Hostname = "archlinux"
+		return
+	}
+	s.cfg.Hostname = strings.TrimSpace(res)
 }
 
 // func (s *Selection) diskSelection2() {}
