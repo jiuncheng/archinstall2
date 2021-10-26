@@ -60,7 +60,7 @@ func main() {
 	} else if cfg.GPU == "amd" {
 		gpuArgs = strings.Join(cfg.Package.AmdGPUPkg, " ")
 	}
-	cmd2 := cmd.NewCmd("pacstrap /mnt " + strings.Join(cfg.Package.PacstrapPkg, " ") + cpuArgs + gpuArgs)
+	cmd2 := cmd.NewCmd("pacstrap /mnt " + strings.Join(cfg.Package.PacstrapPkg, " ") + " " + cpuArgs + " " + gpuArgs)
 	err = cmd2.SetDesc("Downloading packages from Pacstrap...").Run()
 	if err != nil {
 		log.Fatalln(err.Error())
