@@ -9,7 +9,6 @@ pacstrap_pkg:
   - neovim
   - nano
   - mesa
-  - lib32-mesa
   - bash-completion
 
 intel_cpu_pkg:
@@ -25,4 +24,3 @@ nvidia_gpu_pkg:
 
 amd_gpu_pkg:
   - vulkan-radeon
-  - lib32-vulkan-radeon
