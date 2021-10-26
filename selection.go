@@ -126,7 +126,132 @@ func (s *Selection) HostnameSelection() {
 	s.cfg.Hostname = strings.TrimSpace(res)
 }
 
-// func (s *Selection) diskSelection2() {}
+func (s *Selection) RootPassSelection() {
+	for {
+		fmt.Print("\n\n")
+		fmt.Print("Enter root password : ")
+
+		var res string
+		fmt.Scanln(&res)
+		if strings.TrimSpace(res) == "" {
+			fmt.Print("Password cannot be empty. Press enter to select again : ")
+			fmt.Scanln()
+			continue
+		}
+		s.cfg.RootPassword = strings.TrimSpace(res)
+		break
+	}
+}
+
+func (s *Selection) SuperUserSelection() {
+	var user sysconfig.User
+
+	for {
+		fmt.Print("\n\n")
+		fmt.Print("Enter username for superuser : ")
+		var username string
+		fmt.Scanln(&username)
+		if strings.TrimSpace(username) == "" {
+			fmt.Println("Username cannot be empty.")
+			continue
+		}
+		user.Username = strings.TrimSpace(username)
+		break
+	}
+
+	for {
+		fmt.Print("\n")
+		fmt.Print("Enter password for superuser : ")
+		var password string
+		fmt.Scanln(&password)
+		if strings.TrimSpace(password) == "" {
+			fmt.Println("Password cannot be empty.")
+			continue
+		}
+
+		fmt.Print("Enter password again for confirmation : ")
+		var password2 string
+		fmt.Scanln(&password2)
+		if strings.TrimSpace(password2) != strings.TrimSpace(password) {
+			fmt.Println("Password does not match. Try again.")
+			continue
+		}
+		user.Password = strings.TrimSpace(password2)
+		break
+	}
+	s.cfg.Superusers = append(s.cfg.Superusers, user)
+}
+
+func (s *Selection) OptionalUserSelection() {
+	for {
+		for {
+			fmt.Print("\n")
+			fmt.Print("Do you want to create a new user? [y/N] : ")
+			var res string
+			fmt.Scanln(&res)
+			if strings.TrimSpace(res) == "y" || strings.TrimSpace(res) == "Y" {
+				break
+			} else if strings.TrimSpace(res) == "n" || strings.TrimSpace(res) == "N" || strings.TrimSpace(res) == "" {
+				return
+			} else {
+				continue
+			}
+		}
+
+		var user sysconfig.User
+		for {
+			fmt.Print("\n\n")
+			fmt.Print("Enter username for user : ")
+			var username string
+			fmt.Scanln(&username)
+			if strings.TrimSpace(username) == "" {
+				fmt.Println("Username cannot be empty.")
+				continue
+			}
+			user.Username = strings.TrimSpace(username)
+			break
+		}
+
+		for {
+			fmt.Print("\n")
+			fmt.Print("Enter password for user : ")
+			var password string
+			fmt.Scanln(&password)
+			if strings.TrimSpace(password) == "" {
+				fmt.Println("Password cannot be empty.")
+				continue
+			}
+
+			fmt.Print("Enter password again for confirmation : ")
+			var password2 string
+			fmt.Scanln(&password2)
+			if strings.TrimSpace(password2) != strings.TrimSpace(password) {
+				fmt.Println("Password does not match. Try again.")
+				continue
+			}
+			user.Password = strings.TrimSpace(password2)
+			break
+		}
+
+		for {
+			fmt.Print("\n")
+			fmt.Print("Set this user as superuser (sudoer)? [y/N] : ")
+			var res string
+			fmt.Scanln(&res)
+			if strings.TrimSpace(res) == "y" || strings.TrimSpace(res) == "Y" {
+				s.cfg.Superusers = append(s.cfg.Superusers, user)
+				break
+			} else if strings.TrimSpace(res) == "n" || strings.TrimSpace(res) == "N" || strings.TrimSpace(res) == "" {
+				s.cfg.Users = append(s.cfg.Users, user)
+				break
+			} else {
+				continue
+			}
+		}
+
+	}
+
+}
 
 // func (s *Selection) diskSelection2() {}
 

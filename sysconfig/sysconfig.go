@@ -1,17 +1,19 @@
 package sysconfig
 
 type SysConfig struct {
-	InstallDisk string
-	Processor   string
-	Arch        string
-	Hostname    string
-	FS          string
-	KBLayout    string
-	Language    string
-	Timezone    string
-	BootLoader  string
-	Superusers  []User
-	Users       []User
+	RootPassword string
+	LUKSPassword string
+	InstallDisk  string
+	Processor    string
+	Arch         string
+	Hostname     string
+	FS           string
+	KBLayout     string
+	Language     string
+	Timezone     string
+	BootLoader   string
+	Superusers   []User
+	Users        []User
 }
 
 type User struct {
