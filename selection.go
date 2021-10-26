@@ -53,7 +53,7 @@ func (s *Selection) DiskSelection() {
 
 func (s *Selection) LayoutSelection() error {
 	for {
-		out, err := exec.Command("localectl", "list-x11-keymap-layouts").Output()
+		out, err := exec.Command("localectl", "list-keymaps").Output()
 		if err != nil {
 			return err
 		}
