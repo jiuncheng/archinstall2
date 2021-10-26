@@ -9,6 +9,7 @@ type SysConfig struct {
 	KBLayout    string
 	Language    string
 	Timezone    string
+	BootLoader  string
 	Superusers  []User
 	Users       []User
 }

@@ -19,7 +19,13 @@ func NewSelection(cfg *sysconfig.SysConfig) *Selection {
 
 func (s *Selection) PerformSelection() error {
 	s.DiskSelection()
-	return s.LayoutSelection()
+	err := s.LayoutSelection()
+	if err != nil {
+		return err
+	}
+	s.FileSystemSelection()
+
+	return nil
 }
 
 func (s *Selection) DiskSelection() {
@@ -40,12 +46,12 @@ func (s *Selection) DiskSelection() {
 			if result <= len(dl) && result > 0 {
 				break
 			}
-			fmt.Println("\n\nThe number must be between 1 and ", len(dl), ".")
+			fmt.Println("\nThe number must be between 1 and ", len(dl), ".")
 			fmt.Print("Press enter to choose again : ")
 			fmt.Scanln()
 			continue
 		}
-		fmt.Println("\n\nOnly number between 1 and ", len(dl), " is allowed.")
+		fmt.Println("\nOnly number between 1 and ", len(dl), " is allowed.")
 		fmt.Print("Press enter to choose again : ")
 		fmt.Scanln()
 		continue
@@ -76,14 +82,37 @@ func (s *Selection) LayoutSelection() error {
 			fmt.Scanln()
 			continue
 		}
+		s.cfg.KBLayout = res
 		return nil
 	}
 }
 
-// func (s *selection) diskSelection2() {}
+func (s *Selection) FileSystemSelection() {
+	for {
+		fmt.Print("\n\n")
+		fmt.Println("----FILESYSTEM-----")
+		fmt.Println("1. btrfs")
+		fmt.Println("2. ext4")
+		fmt.Print("Choose the filesystem for main partition : ")
 
-// func (s *selection) diskSelection2() {}
+		var res string
+		fmt.Scanln(&res)
+		if res == "1" {
+			s.cfg.FS = "btrfs"
+			return
+		} else if res == "2" {
+			s.cfg.FS = "ext4"
+			return
+		}
 
-// func (s *selection) diskSelection2() {}
+		fmt.Print("Input is invalid. Press enter to select again : ")
+		fmt.Scanln()
+		continue
+	}
+}
 
-// func (s *selection) diskSelection2() {}
+// func (s *Selection) diskSelection2() {}
+
+// func (s *Selection) diskSelection2() {}
+
+// func (s *Selection) diskSelection2() {}
