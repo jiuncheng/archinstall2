@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"os/exec"
 
 	"github.com/jiuncheng/archinstall2/cmd"
 	"github.com/jiuncheng/archinstall2/disklist"
@@ -59,12 +58,7 @@ func main() {
 		log.Fatalln(err.Error())
 	}
 
-	// err = cmd.NewCmd("/bin/bash -c \"genfstab -U /mnt >> /mnt/etc/fstab\"").SetDesc("Generating FSTAB file...").Run()
-	// if err != nil {
-	// 	log.Fatalln(err.Error())
-	// }
-
-	err = exec.Command("sh", "-c", "genfstab -U /mnt >> /mnt/etc/fstab").Run()
+	err = cmd.NewCmd("/bin/bash -c \"genfstab -U /mnt >> /mnt/etc/fstab\"").SetDesc("Generating FSTAB file...").Run()
 	if err != nil {
 		log.Fatalln(err.Error())
 	}

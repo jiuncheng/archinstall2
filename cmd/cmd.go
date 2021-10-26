@@ -47,6 +47,11 @@ func (c *Command) Run() error {
 	r := regexp.MustCompile(`[^\s"]+|"([^"]*)"`)
 	args := r.FindAllString(c.args, -1)
 
+	var trimmedArgs []string
+	for _, arg := range args {
+		trimmedArgs = append(trimmedArgs, strings.Trim(arg, "\""))
+	}
+
 	fmt.Printf("\n%s\n", c.desc)
 	fmt.Printf("Executing command : %s\n", c.args)
 
@@ -56,9 +61,9 @@ func (c *Command) Run() error {
 
 	var cmd *exec.Cmd
 	if len(args) < 2 {
-		cmd = exec.Command(args[0])
+		cmd = exec.Command(trimmedArgs[0])
 	} else {
-		cmd = exec.Command(args[0], args[1:]...)
+		cmd = exec.Command(trimmedArgs[0], trimmedArgs[1:]...)
 	}
 
 	var stdoutBuf, stderrBuf bytes.Buffer
