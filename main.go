@@ -194,11 +194,11 @@ func main() {
 			log.Fatalln(err.Error())
 		}
 
-		uuid, err := cmd.NewCmd("findmnt -fn -o UUID " + cfg.InstallDisk).SetDesc("Finding partition UUID...").Output()
+		uuid, err := cmd.NewCmd("findmnt -fn -o UUID " + cfg.InstallDisk + "2").SetDesc("Finding partition UUID...").Output()
 		if err != nil {
 			log.Fatalln(err.Error())
 		}
-		archContent := "title Arch Linux\nlinux /vmlinuz-linux\ninitrd /" + cfg.Processor + "-ucode.img\ninitrd /initramfs-linux.img\noptions root=UUID=" + string(uuid) + "2 rootflags=\"subvol=@\" rw\n"
+		archContent := "title Arch Linux\nlinux /vmlinuz-linux\ninitrd /" + cfg.Processor + "-ucode.img\ninitrd /initramfs-linux.img\noptions root=UUID=" + string(uuid) + " rootflags=\"subvol=@\" rw\n"
 		err = ioutil.WriteFile("/mnt/boot/loader/entries/arch.conf", []byte(archContent), 0644)
 		if err != nil {
 			log.Fatalln(err.Error())
