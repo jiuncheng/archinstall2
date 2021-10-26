@@ -15,7 +15,15 @@ type SysConfig struct {
 	BootLoader   string
 	Superusers   []User
 	Users        []User
+	Package      Package
+}
+
+type Package struct {
 	PacstrapPkg  []string
+	IntelCPUPkg  []string
+	AmdCPUPkg    []string
+	NvidiaGPUPkg []string
+	AmdGPUPkg    []string
 }
 
 type User struct {

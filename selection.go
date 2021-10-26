@@ -26,6 +26,7 @@ func (s *Selection) PerformSelection() error {
 	}
 	s.FileSystemSelection()
 	s.HostnameSelection()
+	s.RootPassSelection()
 	s.SuperUserSelection()
 	s.OptionalUserSelection()
 	s.ProcessorSelection()
@@ -303,7 +304,8 @@ func (s *Selection) GPUSelection() {
 		fmt.Print("\n\n")
 		fmt.Println("-----Graphics Model-----")
 		fmt.Println("1. Intel gpu")
-		fmt.Println("2. AMD gpu")
+		fmt.Println("2. Nvidia gpu")
+		fmt.Println("3. AMD gpu")
 		fmt.Print("Select graphics model : ")
 
 		var res string
@@ -313,6 +315,10 @@ func (s *Selection) GPUSelection() {
 			fmt.Println(s.cfg.GPU)
 			break
 		} else if strings.TrimSpace(res) == "2" {
+			s.cfg.GPU = "nvidia"
+			fmt.Println(s.cfg.GPU)
+			break
+		} else if strings.TrimSpace(res) == "3" {
 			s.cfg.GPU = "amd"
 			fmt.Println(s.cfg.GPU)
 			break
