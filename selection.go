@@ -58,7 +58,7 @@ func (s *Selection) LayoutSelection() error {
 			return err
 		}
 		fmt.Println(string(out))
-		fmt.Println("Select one of the following keyboard layout or skip (default: us) : ")
+		fmt.Print("Select one of the following keyboard layout or skip (default: us) : ")
 		var res string
 		fmt.Scanf("%s", &res)
 
