@@ -46,6 +46,8 @@ func (s *Selection) DiskSelection() {
 			continue
 		}
 		fmt.Println("\n\nOnly number between 1 and ", len(dl), " is allowed.")
+		fmt.Print("Press enter to choose again : ")
+		fmt.Scanln()
 	}
 
 	s.cfg.InstallDisk = "/dev/" + dl[result-1].Name
@@ -70,7 +72,7 @@ func (s *Selection) LayoutSelection() error {
 		err = exec.Command("localectl", "set-keymap", res).Run()
 		if err != nil {
 			fmt.Print("Keymap is invalid. Press enter to select again : ")
-			fmt.Scanln(nil)
+			fmt.Scanln()
 			continue
 		}
 		return nil
