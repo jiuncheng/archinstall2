@@ -69,8 +69,8 @@ func (s *Selection) LayoutSelection() error {
 
 		err = exec.Command("localectl", "set-keymap", res).Run()
 		if err != nil {
-			fmt.Println("Keymap is invalid. Press enter to select again : ")
-			fmt.Scan()
+			fmt.Print("Keymap is invalid. Press enter to select again : ")
+			fmt.Scanln()
 			continue
 		}
 		return nil
