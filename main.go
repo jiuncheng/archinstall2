@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"os/exec"
 
 	"github.com/jiuncheng/archinstall2/cmd"
 	"github.com/jiuncheng/archinstall2/disklist"
@@ -52,13 +53,18 @@ func main() {
 	}
 	filesystem.NewBtrfsHelper(cfg).GenerateBTRFSSystem()
 
-	cmd2 := cmd.NewCmd("pacstrap /mnt base base-devel linux linux-firmware intel-ucode git neovim nano btrfs-progs")
+	cmd2 := cmd.NewCmd("pacstrap /mnt base linux intel-ucode git neovim nano btrfs-progs")
 	err = cmd2.SetDesc("Downloading packages from Pacstrap...").Run()
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
 
-	err = cmd.NewCmd("/bin/bash -c \"genfstab -U /mnt >> /mnt/etc/fstab\"").SetDesc("Generating FSTAB file...").Run()
+	// err = cmd.NewCmd("/bin/bash -c \"genfstab -U /mnt >> /mnt/etc/fstab\"").SetDesc("Generating FSTAB file...").Run()
+	// if err != nil {
+	// 	log.Fatalln(err.Error())
+	// }
+
+	err = exec.Command("bin/bash", "-c", "genfstab -U /mnt >> /mnt/etc/fstab").Run()
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
