@@ -7,13 +7,13 @@ import (
 	"os"
 
 	"github.com/jiuncheng/archinstall2/cmd"
-	"github.com/jiuncheng/archinstall2/disklist"
 	"github.com/jiuncheng/archinstall2/diskutil"
 	"github.com/jiuncheng/archinstall2/filesystem"
 	"github.com/jiuncheng/archinstall2/sysconfig"
 )
 
 func main() {
+	// Prerequisite
 	err := cmd.NewCmd("timedatectl set-ntp true").SetDesc("Syncing datetime to ntp server...").Run()
 	if err != nil {
 		log.Fatalln(err.Error())
@@ -22,32 +22,37 @@ func main() {
 
 	cfg := sysconfig.NewSysConfig()
 
-	dl, err := disklist.GetDiskList()
+	// dl, err := disklist.GetDiskList()
+	// if err != nil {
+	// 	log.Fatalln(err.Error())
+	// }
+
+	// var result int
+	// for {
+	// 	for i, disk := range dl {
+	// 		fmt.Printf("%d.    /dev/%s    %s\n", i+1, disk.Name, disk.Size)
+	// 	}
+	// 	fmt.Print("\n Please select the number which the disk will be used for installation (e.g. 1): ")
+
+	// 	_, err = fmt.Scanf("%d", &result)
+	// 	if err == nil {
+	// 		if result <= len(dl) && result > 0 {
+	// 			break
+	// 		}
+	// 		fmt.Println("\n\nThe number must be between 1 and ", len(dl), ".")
+	// 		fmt.Print("Press enter to choose again : ")
+	// 		fmt.Scanln()
+	// 		continue
+	// 	}
+	// 	fmt.Println("\n\nOnly number between 1 and ", len(dl), " is allowed.")
+	// }
+
+	// cfg.InstallDisk = "/dev/" + dl[result-1].Name
+
+	err = NewSelection(cfg).PerformSelection()
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
-
-	var result int
-	for {
-		for i, disk := range dl {
-			fmt.Printf("%d.    /dev/%s    %s\n", i+1, disk.Name, disk.Size)
-		}
-		fmt.Print("\n Please select the number which the disk will be used for installation (e.g. 1): ")
-
-		_, err = fmt.Scanf("%d", &result)
-		if err == nil {
-			if result <= len(dl) && result > 0 {
-				break
-			}
-			fmt.Println("\n\nThe number must be between 1 and ", len(dl), ".")
-			fmt.Print("Press enter to choose again : ")
-			fmt.Scanln()
-			continue
-		}
-		fmt.Println("\n\nOnly number between 1 and ", len(dl), " is allowed.")
-	}
-
-	cfg.InstallDisk = "/dev/" + dl[result-1].Name
 
 	err = diskutil.NewDiskUtil(cfg).CreateBTRFS()
 	if err != nil {
@@ -91,47 +96,27 @@ func main() {
 		log.Fatalln(err.Error())
 	}
 
-	// err = cmd.NewCmd("/bin/bash -c \"arch-chroot /mnt echo 'LANG=en_US.UTF-8' >> /etc/locale.conf\"").Run()
-	// if err != nil {
-	// 	log.Fatalln(err.Error())
-	// }
-
 	err = ioutil.WriteFile("/mnt/etc/locale.conf", []byte("LANG=en_US.UTF-8\n"), 0644)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
-
-	// err = cmd.NewCmd("/bin/bash -c \"arch-chroot /mnt echo 'archlinux' >> /etc/hostname\"").SetDesc("Setting hostname as archlinux...").Run()
-	// if err != nil {
-	// 	log.Fatalln(err.Error())
-	// }
 
 	err = ioutil.WriteFile("/mnt/etc/hostname", []byte("archlinux\n"), 0644)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
 
-	// err = cmd.NewCmd("/bin/bash -c \"arch-chroot /mnt echo '127.0.0.1    localhost' >> /etc/hosts\"").SetDesc("Configuring /etc/hosts...").Run()
-	// if err != nil {
-	// 	log.Fatalln(err.Error())
-	// }
-
 	err = ioutil.WriteFile("/mnt/etc/hosts", []byte("127.0.0.1\tlocalhost\n"), 0644)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
-
-	// err = cmd.NewCmd("/bin/bash -c \"arch-chroot /mnt echo '::1    localhost' >> /etc/hosts\"").Run()
-	// if err != nil {
-	// 	log.Fatalln(err.Error())
-	// }
 
 	file, err := os.OpenFile("/mnt/etc/hosts", os.O_APPEND|os.O_WRONLY, 0644)
 	if err != nil {
 		log.Println(err)
 	}
 	defer file.Close()
-	_, err = file.WriteString("::1\tlocalhost\n")
+	_, err = file.WriteString("::1\t\tlocalhost\n")
 	if err != nil {
 		log.Fatal(err)
 	}

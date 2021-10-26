@@ -71,8 +71,8 @@ func (c *Command) Run() error {
 	cmd.Stderr = io.MultiWriter(os.Stderr, &stderrBuf)
 
 	err := cmd.Run()
-	outStr, errStr := stdoutBuf.String(), stderrBuf.String()
-	fmt.Printf("\n%s\n%s\n", outStr, errStr)
+	_, errStr := stdoutBuf.String(), stderrBuf.String()
+	fmt.Printf("%s", errStr)
 	log.Println("Operation done.")
 	return err
 
