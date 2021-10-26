@@ -64,7 +64,7 @@ func main() {
 	// 	log.Fatalln(err.Error())
 	// }
 
-	err = exec.Command("bin/bash", "-c", "genfstab -U /mnt >> /mnt/etc/fstab").Run()
+	err = exec.Command("sh", "-c", "genfstab -U /mnt >> /mnt/etc/fstab").Run()
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
