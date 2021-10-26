@@ -52,15 +52,29 @@ func (s *Selection) DiskSelection() {
 }
 
 func (s *Selection) LayoutSelection() error {
-	out, err := exec.Command("localectl", "list-x11-keymap-layouts").Output()
-	if err != nil {
-		return err
+	for {
+		out, err := exec.Command("localectl", "list-x11-keymap-layouts").Output()
+		if err != nil {
+			return err
+		}
+		fmt.Println(string(out))
+		fmt.Println("Select one of the following keyboard layout or skip (default: us) : ")
+		var res string
+		fmt.Scanf("%s", &res)
+
+		if res == "us" || res == "" {
+			s.cfg.KBLayout = res
+			return nil
+		}
+
+		err = exec.Command("localectl", "set-keymap", res).Run()
+		if err != nil {
+			fmt.Println("Keymap is invalid. Press enter to select again : ")
+			fmt.Scan()
+			continue
+		}
+		return nil
 	}
-	fmt.Println(string(out))
-	fmt.Println("Select one of the following keyboard layout or skip (default: us) : ")
-	var res string
-	fmt.Scanf("%s", &res)
-	return nil
 }
 
 // func (s *selection) diskSelection2() {}
