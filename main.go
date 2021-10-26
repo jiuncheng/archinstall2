@@ -19,6 +19,11 @@ func main() {
 		log.Fatalln(err.Error())
 	}
 
+	err = cmd.NewCmd("umount -a").SetDesc("Umounting all drives").Run()
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
 	cfg := sysconfig.NewSysConfig()
 
 	dl, err := disklist.GetDiskList()
@@ -115,7 +120,7 @@ func main() {
 	// 	log.Fatalln(err.Error())
 	// }
 
-	err = ioutil.WriteFile("/mnt/etc/hosts", []byte("127.0.0.1    localhost\n"), 0644)
+	err = ioutil.WriteFile("/mnt/etc/hosts", []byte("127.0.0.1\tlocalhost\n"), 0644)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
@@ -130,7 +135,7 @@ func main() {
 		log.Println(err)
 	}
 	defer file.Close()
-	_, err = file.WriteString("::1    localhost\n")
+	_, err = file.WriteString("::1\tlocalhost\n")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -145,7 +150,7 @@ func main() {
 		log.Println(err)
 	}
 	defer file2.Close()
-	_, err = file2.WriteString("127.0.1.1    archlinux.localdomain archlinux\n")
+	_, err = file2.WriteString("127.0.1.1\tarchlinux.localdomain\tarchlinux\n")
 	if err != nil {
 		log.Fatal(err)
 	}
