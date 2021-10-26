@@ -10,6 +10,9 @@ pacstrap_pkg:
   - nano
   - mesa
   - bash-completion
+  - xorg
+  - xorg-server
+  - egl-wayland
 
 intel_cpu_pkg:
   - intel-ucode
@@ -19,8 +22,8 @@ amd_cpu_pkg:
 
 nvidia_gpu_pkg:
   - nvidia
-  - nvidia_utils
-  - nvidia_settings
+  - nvidia-utils
+  - nvidia-settings
 
 amd_gpu_pkg:
   - vulkan-radeon
