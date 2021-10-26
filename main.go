@@ -12,6 +12,11 @@ import (
 )
 
 func main() {
+	err := cmd.NewCmd("timedatectl set-ntp true").SetDesc("Syncing datetime to ntp server...").Run()
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
 	cfg := sysconfig.NewSysConfig()
 
 	dl, err := disklist.GetDiskList()
@@ -53,7 +58,7 @@ func main() {
 		log.Fatalln(err.Error())
 	}
 
-	err = cmd.NewCmd("genfstab -U /mnt >> /mnt/etc/fstab").SetDesc("Generating FSTAB file...").Run()
+	err = cmd.NewCmd("/bin/sh -c \"genfstab -U /mnt >> /mnt/etc/fstab\"").SetDesc("Generating FSTAB file...").Run()
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
@@ -83,45 +88,45 @@ func main() {
 		log.Fatalln(err.Error())
 	}
 
-	err = cmd.NewCmd("arch-chroot /mnt echo 'LANG=en_US.UTF-8' >> /etc/locale.conf").Run()
+	err = cmd.NewCmd("/bin/sh -c \"arch-chroot /mnt echo 'LANG=en_US.UTF-8' >> /etc/locale.conf\"").Run()
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
 
-	err = cmd.NewCmd("arch-chroot /mnt echo 'archlinux' >> /etc/hostname").SetDesc("Setting hostname as archlinux...").Run()
+	err = cmd.NewCmd("/bin/sh -c \"arch-chroot /mnt echo 'archlinux' >> /etc/hostname\"").SetDesc("Setting hostname as archlinux...").Run()
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
 
-	err = cmd.NewCmd("arch-chroot /mnt echo '127.0.0.1    localhost' >> /etc/hosts").SetDesc("Configuring /etc/hosts...").Run()
+	err = cmd.NewCmd("/bin/sh -c \"arch-chroot /mnt echo '127.0.0.1    localhost' >> /etc/hosts\"").SetDesc("Configuring /etc/hosts...").Run()
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
 
-	err = cmd.NewCmd("arch-chroot /mnt echo '::1    localhost' >> /etc/hosts").Run()
+	err = cmd.NewCmd("/bin/sh -c \"arch-chroot /mnt echo '::1    localhost' >> /etc/hosts\"").Run()
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
 
-	err = cmd.NewCmd("arch-chroot /mnt echo '127.0.1.1    archlinux.localdomain archlinux' >> /etc/hosts").Run()
+	err = cmd.NewCmd("/bin/sh -c \"arch-chroot /mnt echo '127.0.1.1    archlinux.localdomain archlinux' >> /etc/hosts\"").Run()
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
 
 	fmt.Print("\nPlease enter a root password: ")
 	var pwd string
-	_, err = fmt.Scanln(&result)
+	_, err = fmt.Scanln(&pwd)
 	if err != nil {
 		log.Println(err.Error())
 	}
 	fmt.Println("New root password is ", pwd)
 
-	err = cmd.NewCmd("arch-chroot /mnt echo root:" + pwd + " | " + "chpasswd").Run()
+	err = cmd.NewCmd("/bin/sh -c \"arch-chroot /mnt echo root:" + pwd + " | " + "chpasswd\"").Run()
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
 
-	err = cmd.NewCmd("useradd -mG wheel -s /bin/bash -p 12345 home3").Run()
+	err = cmd.NewCmd("arch-chroot /mnt useradd -mG wheel -s /bin/bash -p 12345 home3").Run()
 	if err != nil {
 		log.Fatalln(err.Error())
 	}

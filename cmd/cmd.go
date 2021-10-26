@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"regexp"
 	"strings"
 )
 
@@ -41,7 +42,10 @@ func (c *Command) SetDesc(desc string) *Command {
 
 func (c *Command) Run() error {
 	// args := strings.Split(c.args, " ")
-	args := strings.Fields(c.args)
+	// args := strings.Fields(c.args)
+
+	r := regexp.MustCompile(`[^\s"]+|"([^"]*)"`)
+	args := r.FindAllString(c.args, -1)
 
 	fmt.Printf("\n%s\n", c.desc)
 	fmt.Printf("Executing command : %s\n", c.args)
