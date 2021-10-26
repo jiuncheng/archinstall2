@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
+	"os"
 
 	"github.com/jiuncheng/archinstall2/cmd"
 	"github.com/jiuncheng/archinstall2/disklist"
@@ -88,29 +90,64 @@ func main() {
 		log.Fatalln(err.Error())
 	}
 
-	err = cmd.NewCmd("/bin/bash -c \"arch-chroot /mnt echo 'LANG=en_US.UTF-8' >> /etc/locale.conf\"").Run()
+	// err = cmd.NewCmd("/bin/bash -c \"arch-chroot /mnt echo 'LANG=en_US.UTF-8' >> /etc/locale.conf\"").Run()
+	// if err != nil {
+	// 	log.Fatalln(err.Error())
+	// }
+
+	err = ioutil.WriteFile("/mnt/etc/locale.conf", []byte("LANG=en_US.UTF-8\n"), 0644)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
 
-	err = cmd.NewCmd("/bin/bash -c \"arch-chroot /mnt echo 'archlinux' >> /etc/hostname\"").SetDesc("Setting hostname as archlinux...").Run()
+	// err = cmd.NewCmd("/bin/bash -c \"arch-chroot /mnt echo 'archlinux' >> /etc/hostname\"").SetDesc("Setting hostname as archlinux...").Run()
+	// if err != nil {
+	// 	log.Fatalln(err.Error())
+	// }
+
+	err = ioutil.WriteFile("/mnt/etc/hostname", []byte("archlinux\n"), 0644)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
 
-	err = cmd.NewCmd("/bin/bash -c \"arch-chroot /mnt echo '127.0.0.1    localhost' >> /etc/hosts\"").SetDesc("Configuring /etc/hosts...").Run()
+	// err = cmd.NewCmd("/bin/bash -c \"arch-chroot /mnt echo '127.0.0.1    localhost' >> /etc/hosts\"").SetDesc("Configuring /etc/hosts...").Run()
+	// if err != nil {
+	// 	log.Fatalln(err.Error())
+	// }
+
+	err = ioutil.WriteFile("/mnt/etc/hosts", []byte("127.0.0.1    localhost\n"), 0644)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
 
-	err = cmd.NewCmd("/bin/bash -c \"arch-chroot /mnt echo '::1    localhost' >> /etc/hosts\"").Run()
+	// err = cmd.NewCmd("/bin/bash -c \"arch-chroot /mnt echo '::1    localhost' >> /etc/hosts\"").Run()
+	// if err != nil {
+	// 	log.Fatalln(err.Error())
+	// }
+
+	file, err := os.OpenFile("/mnt/etc/hosts", os.O_APPEND|os.O_WRONLY, 0644)
 	if err != nil {
-		log.Fatalln(err.Error())
+		log.Println(err)
+	}
+	defer file.Close()
+	_, err = file.WriteString("::1    localhost\n")
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	err = cmd.NewCmd("/bin/bash -c \"arch-chroot /mnt echo '127.0.1.1    archlinux.localdomain archlinux' >> /etc/hosts\"").Run()
+	// err = cmd.NewCmd("/bin/bash -c \"arch-chroot /mnt echo '127.0.1.1    archlinux.localdomain archlinux' >> /etc/hosts\"").Run()
+	// if err != nil {
+	// 	log.Fatalln(err.Error())
+	// }
+
+	file2, err := os.OpenFile("/mnt/etc/hosts", os.O_APPEND|os.O_WRONLY, 0644)
 	if err != nil {
-		log.Fatalln(err.Error())
+		log.Println(err)
+	}
+	defer file2.Close()
+	_, err = file2.WriteString("127.0.1.1    archlinux.localdomain archlinux\n")
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	fmt.Print("\nPlease enter a root password: ")
