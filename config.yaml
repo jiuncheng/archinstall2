@@ -1,0 +1,12 @@
+pacstrap_pkg:
+  - base
+  - base-devel
+  - linux
+  - linux-firmware
+  - linux-headers
+  - btrfs-progs
+  - git
+  - neovim
+  - nano
+  - mesa
+  - bash-completion

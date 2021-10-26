@@ -28,6 +28,8 @@ func (s *Selection) PerformSelection() error {
 	s.HostnameSelection()
 	s.SuperUserSelection()
 	s.OptionalUserSelection()
+	s.ProcessorSelection()
+	s.GPUSelection()
 
 	return nil
 }
@@ -62,6 +64,7 @@ func (s *Selection) DiskSelection() {
 	}
 
 	s.cfg.InstallDisk = "/dev/" + dl[result-1].Name
+	fmt.Println(s.cfg.InstallDisk)
 }
 
 func (s *Selection) LayoutSelection() error {
@@ -77,6 +80,7 @@ func (s *Selection) LayoutSelection() error {
 
 		if strings.TrimSpace(res) == "us" || strings.TrimSpace(res) == "" {
 			s.cfg.KBLayout = strings.TrimSpace(res)
+			fmt.Println(s.cfg.KBLayout)
 			return nil
 		}
 
@@ -87,6 +91,7 @@ func (s *Selection) LayoutSelection() error {
 			continue
 		}
 		s.cfg.KBLayout = strings.TrimSpace(res)
+		fmt.Println(s.cfg.KBLayout)
 		return nil
 	}
 }
@@ -103,9 +108,11 @@ func (s *Selection) FileSystemSelection() {
 		fmt.Scanln(&res)
 		if strings.TrimSpace(res) == "1" || strings.TrimSpace(res) == "" {
 			s.cfg.FS = "btrfs"
+			fmt.Println(s.cfg.FS)
 			return
 		} else if strings.TrimSpace(res) == "2" {
 			s.cfg.FS = "ext4"
+			fmt.Println(s.cfg.FS)
 			return
 		}
 
@@ -115,6 +122,9 @@ func (s *Selection) FileSystemSelection() {
 	}
 }
 
+// func (s *Selection) EncryptionSelection() {
+// }
+
 func (s *Selection) HostnameSelection() {
 	fmt.Print("\n\n")
 	fmt.Print("Enter desired hostname for installation (default: archlinux) : ")
@@ -123,24 +133,32 @@ func (s *Selection) HostnameSelection() {
 	fmt.Scanln(&res)
 	if strings.TrimSpace(res) == "" {
 		s.cfg.Hostname = "archlinux"
+		fmt.Println(s.cfg.Hostname)
 		return
 	}
 	s.cfg.Hostname = strings.TrimSpace(res)
+	fmt.Println(s.cfg.Hostname)
 }
 
 func (s *Selection) RootPassSelection() {
 	for {
-		fmt.Print("\n\n")
-		fmt.Print("Enter root password : ")
-
-		var res string
-		fmt.Scanln(&res)
-		if strings.TrimSpace(res) == "" {
-			fmt.Print("Password cannot be empty. Press enter to select again : ")
-			fmt.Scanln()
+		fmt.Print("\n")
+		fmt.Print("Enter password for root user : ")
+		var password string
+		fmt.Scanln(&password)
+		if strings.TrimSpace(password) == "" {
+			fmt.Println("Password cannot be empty.")
 			continue
 		}
-		s.cfg.RootPassword = strings.TrimSpace(res)
+
+		fmt.Print("Enter password again for confirmation : ")
+		var password2 string
+		fmt.Scanln(&password2)
+		if strings.TrimSpace(password2) != strings.TrimSpace(password) {
+			fmt.Println("Password does not match. Try again.")
+			continue
+		}
+		s.cfg.RootPassword = strings.TrimSpace(password2)
 		break
 	}
 }
@@ -182,13 +200,14 @@ func (s *Selection) SuperUserSelection() {
 		break
 	}
 	s.cfg.Superusers = append(s.cfg.Superusers, user)
+	fmt.Println(strings.TrimSpace(user.Username))
 }
 
 func (s *Selection) OptionalUserSelection() {
 	for {
 		for {
 			fmt.Print("\n")
-			fmt.Print("Do you want to create a new user? [y/N] : ")
+			fmt.Print("Do you want to create additional user? [y/N] : ")
 			var res string
 			fmt.Scanln(&res)
 			if strings.TrimSpace(res) == "y" || strings.TrimSpace(res) == "Y" {
@@ -211,6 +230,7 @@ func (s *Selection) OptionalUserSelection() {
 				continue
 			}
 			user.Username = strings.TrimSpace(username)
+			fmt.Println(strings.TrimSpace(user.Username))
 			break
 		}
 
@@ -255,6 +275,48 @@ func (s *Selection) OptionalUserSelection() {
 
 }
 
-// func (s *Selection) diskSelection2() {}
+func (s *Selection) ProcessorSelection() {
+	for {
+		fmt.Print("\n\n")
+		fmt.Println("-----Processor-----")
+		fmt.Println("1. Intel cpu")
+		fmt.Println("2. AMD cpu")
+		fmt.Print("Select processor model : ")
 
-// func (s *Selection) diskSelection2() {}
+		var res string
+		fmt.Scanln(&res)
+		if strings.TrimSpace(res) == "1" {
+			s.cfg.Processor = "intel"
+			fmt.Println(s.cfg.Processor)
+			break
+		} else if strings.TrimSpace(res) == "2" {
+			s.cfg.Processor = "amd"
+			fmt.Println(s.cfg.Processor)
+			break
+		}
+		continue
+	}
+}
+
+func (s *Selection) GPUSelection() {
+	for {
+		fmt.Print("\n\n")
+		fmt.Println("-----Graphics Model-----")
+		fmt.Println("1. Intel gpu")
+		fmt.Println("2. AMD gpu")
+		fmt.Print("Select graphics model : ")
+
+		var res string
+		fmt.Scanln(&res)
+		if strings.TrimSpace(res) == "1" {
+			s.cfg.GPU = "intel"
+			fmt.Println(s.cfg.GPU)
+			break
+		} else if strings.TrimSpace(res) == "2" {
+			s.cfg.GPU = "amd"
+			fmt.Println(s.cfg.GPU)
+			break
+		}
+		continue
+	}
+}

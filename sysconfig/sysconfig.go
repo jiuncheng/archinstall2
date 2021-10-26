@@ -5,6 +5,7 @@ type SysConfig struct {
 	LUKSPassword string
 	InstallDisk  string
 	Processor    string
+	GPU          string
 	Arch         string
 	Hostname     string
 	FS           string
@@ -14,6 +15,7 @@ type SysConfig struct {
 	BootLoader   string
 	Superusers   []User
 	Users        []User
+	PacstrapPkg  []string
 }
 
 type User struct {

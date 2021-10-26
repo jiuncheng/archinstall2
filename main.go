@@ -5,49 +5,33 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/jiuncheng/archinstall2/cmd"
 	"github.com/jiuncheng/archinstall2/diskutil"
 	"github.com/jiuncheng/archinstall2/filesystem"
 	"github.com/jiuncheng/archinstall2/sysconfig"
+	"github.com/spf13/viper"
 )
 
 func main() {
+	viper.SetConfigName("config")
+	viper.SetConfigType("yaml")
+	viper.AddConfigPath(".")
+	err := viper.ReadInConfig()
+	if err != nil {
+		panic(fmt.Errorf("fatal error config file: %w", err))
+	}
 	// Prerequisite
-	err := cmd.NewCmd("timedatectl set-ntp true").SetDesc("Syncing datetime to ntp server...").Run()
+	err = cmd.NewCmd("timedatectl set-ntp true").SetDesc("Syncing datetime to ntp server...").Run()
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
 	cmd.NewCmd("umount -a").SetDesc("Umounting all drives").Run()
 
 	cfg := sysconfig.NewSysConfig()
-
-	// dl, err := disklist.GetDiskList()
-	// if err != nil {
-	// 	log.Fatalln(err.Error())
-	// }
-
-	// var result int
-	// for {
-	// 	for i, disk := range dl {
-	// 		fmt.Printf("%d.    /dev/%s    %s\n", i+1, disk.Name, disk.Size)
-	// 	}
-	// 	fmt.Print("\n Please select the number which the disk will be used for installation (e.g. 1): ")
-
-	// 	_, err = fmt.Scanf("%d", &result)
-	// 	if err == nil {
-	// 		if result <= len(dl) && result > 0 {
-	// 			break
-	// 		}
-	// 		fmt.Println("\n\nThe number must be between 1 and ", len(dl), ".")
-	// 		fmt.Print("Press enter to choose again : ")
-	// 		fmt.Scanln()
-	// 		continue
-	// 	}
-	// 	fmt.Println("\n\nOnly number between 1 and ", len(dl), " is allowed.")
-	// }
-
-	// cfg.InstallDisk = "/dev/" + dl[result-1].Name
+	cfg.PacstrapPkg = viper.GetStringSlice("pacstrap_pkg")
+	fmt.Println(cfg.PacstrapPkg)
 
 	err = NewSelection(cfg).PerformSelection()
 	if err != nil {
@@ -60,7 +44,7 @@ func main() {
 	}
 	filesystem.NewBtrfsHelper(cfg).GenerateBTRFSSystem()
 
-	cmd2 := cmd.NewCmd("pacstrap /mnt base linux intel-ucode git neovim nano btrfs-progs")
+	cmd2 := cmd.NewCmd("pacstrap /mnt " + strings.Join(cfg.PacstrapPkg, " "))
 	err = cmd2.SetDesc("Downloading packages from Pacstrap...").Run()
 	if err != nil {
 		log.Fatalln(err.Error())
