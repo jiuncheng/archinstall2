@@ -60,7 +60,7 @@ func (s *Selection) LayoutSelection() error {
 		fmt.Println(string(out))
 		fmt.Print("Select one of the following keyboard layout or skip (default: us) : ")
 		var res string
-		fmt.Scanf("%s", &res)
+		fmt.Scanln(&res)
 
 		if res == "us" || res == "" {
 			s.cfg.KBLayout = res
