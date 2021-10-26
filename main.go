@@ -18,11 +18,7 @@ func main() {
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
-
-	err = cmd.NewCmd("umount -a").SetDesc("Umounting all drives").Run()
-	if err != nil {
-		log.Fatalln(err.Error())
-	}
+	cmd.NewCmd("umount -a").SetDesc("Umounting all drives").Run()
 
 	cfg := sysconfig.NewSysConfig()
 
