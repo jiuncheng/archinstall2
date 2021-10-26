@@ -30,11 +30,15 @@ func main() {
 	cmd.NewCmd("umount -a").SetDesc("Umounting all drives").Run()
 
 	cfg := sysconfig.NewSysConfig()
+	cfg.Services = viper.GetStringSlice("services")
 	cfg.Package.PacstrapPkg = viper.GetStringSlice("pacstrap_pkg")
 	cfg.Package.IntelCPUPkg = viper.GetStringSlice("intel_cpu_pkg")
 	cfg.Package.AmdCPUPkg = viper.GetStringSlice("amd_cpu_pkg")
 	cfg.Package.NvidiaGPUPkg = viper.GetStringSlice("nvidia_gpu_pkg")
 	cfg.Package.AmdGPUPkg = viper.GetStringSlice("amd_gpu_pkg")
+	cfg.Package.GnomePkg = viper.GetStringSlice("gnome_pkg")
+	cfg.Package.PlasmaPkg = viper.GetStringSlice("plasma_pkg")
+	cfg.Package.ExtraPkg = viper.GetStringSlice("extra_pkg")
 
 	err = NewSelection(cfg).PerformSelection()
 	if err != nil {
@@ -60,7 +64,20 @@ func main() {
 	} else if cfg.GPU == "amd" {
 		gpuArgs = strings.Join(cfg.Package.AmdGPUPkg, " ")
 	}
-	cmd2 := cmd.NewCmd("pacstrap /mnt " + strings.Join(cfg.Package.PacstrapPkg, " ") + " " + cpuArgs + " " + gpuArgs)
+
+	var guiArgs string
+	if cfg.Desktop == "gnome" {
+		guiArgs = strings.Join(cfg.Package.GnomePkg, " ")
+	} else if cfg.Desktop == "plasma" {
+		guiArgs = strings.Join(cfg.Package.PlasmaPkg, " ")
+	}
+
+	var bootloaderArgs string
+	if cfg.BootLoader == "grub" {
+		bootloaderArgs = strings.Join(cfg.Package.GrubPkg, " ")
+	}
+
+	cmd2 := cmd.NewCmd("pacstrap /mnt " + strings.Join(cfg.Package.PacstrapPkg, " ") + " " + strings.Join(cfg.Package.ExtraPkg, " ") + " " + cpuArgs + " " + gpuArgs + " " + guiArgs + " " + bootloaderArgs)
 	err = cmd2.SetDesc("Downloading packages from Pacstrap...").Run()
 	if err != nil {
 		log.Fatalln(err.Error())
@@ -131,14 +148,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// fmt.Print("\nPlease enter a root password: ")
-	// var pwd string
-	// _, err = fmt.Scanln(&pwd)
-	// if err != nil {
-	// 	log.Println(err.Error())
-	// }
-	// fmt.Println("New root password is ", pwd)
-
 	err = cmd.NewCmd("/bin/bash -c \"arch-chroot /mnt echo root:" + cfg.RootPassword + " | " + "chpasswd\"").Run()
 	if err != nil {
 		log.Fatalln(err.Error())
@@ -158,6 +167,70 @@ func main() {
 		}
 	}
 
-	// fmt.Println(cfg.InstallDisk)
+	err = cmd.NewCmd("arch-chroot /mnt sed -i \"s/^# *\\(%wheel  ALL=(ALL)       ALL	\\)/\\1/\" /etc/sudoers").SetDesc("Allowing wheel group to run sudo command...").Run()
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	if cfg.BootLoader == "grub" {
+		err = cmd.NewCmd("arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB --removable").SetDesc("Creating grub bootloader...").Run()
+		if err != nil {
+			log.Fatalln(err.Error())
+		}
+
+		err = cmd.NewCmd("arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg").SetDesc("Creating grub config...").Run()
+		if err != nil {
+			log.Fatalln(err.Error())
+		}
+	} else if cfg.BootLoader == "systemd-boot" {
+		err = cmd.NewCmd("arch-chroot /mnt bootctl --path=/boot install").SetDesc("Creating bootloader...").Run()
+		if err != nil {
+			log.Fatalln(err.Error())
+		}
+
+		loaderContent := "default\t\tarch.conf\n# timeout\t\t4\nconsole-mode\tmax\neditor\t\t\tno\n"
+		err = ioutil.WriteFile("/mnt/boot/loader/loader.conf", []byte(loaderContent), 0644)
+		if err != nil {
+			log.Fatalln(err.Error())
+		}
+
+		uuid, err := cmd.NewCmd("findmnt -fn -o UUID " + cfg.InstallDisk).SetDesc("Finding partition UUID...").Output()
+		if err != nil {
+			log.Fatalln(err.Error())
+		}
+		archContent := "title Arch Linux\nlinux /vmlinuz-linux\ninitrd /" + cfg.Processor + "-ucode.img\ninitrd /initramfs-linux.img\noptions root=UUID=" + string(uuid) + "2 rootflags=\"subvol=@\" rw\n"
+		err = ioutil.WriteFile("/mnt/boot/loader/entries/arch.conf", []byte(archContent), 0644)
+		if err != nil {
+			log.Fatalln(err.Error())
+		}
+	}
+
+	err = EnableServices(cfg)
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	if cfg.Desktop == "gnome" {
+		err := cmd.NewCmd("arch-chroot /mnt systemctl enable gdm").SetDesc("Enabling gdm service").Run()
+		if err != nil {
+			log.Fatalln(err.Error())
+		}
+	} else if cfg.Desktop == "plasma" {
+		err := cmd.NewCmd("arch-chroot /mnt systemctl enable sddm").SetDesc("Enabling sddm service").Run()
+		if err != nil {
+			log.Fatalln(err.Error())
+		}
+	}
+
 	fmt.Println("Installation done. You will now be able to reboot.")
+}
+
+func EnableServices(cfg *sysconfig.SysConfig) error {
+	for _, service := range cfg.Services {
+		err := cmd.NewCmd("arch-chroot /mnt systemctl enable " + service).SetDesc("Enabling" + service + " service").Run()
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }

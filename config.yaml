@@ -13,6 +13,53 @@ pacstrap_pkg:
   - xorg
   - xorg-server
   - egl-wayland
+  - efibootmgr
+  - xdg-user-dirs
+  - xdg-utils
+  - alsa-utils
+  - pipewire
+  - pipewire-jack
+  - pipewire-alsa
+  - pipewire-pulse
+  - os-prober
+
+extra_pkg:
+  - vlc
+  - bluez
+  - bluez-util
+  - networkmanager
+  - network-manager-applet
+  - wpa_supplicant
+  - wireless_tools
+  - cups
+  - bluez-cups
+  - cups-pdf
+  - dialog
+  - mtools
+  - dosfstools
+  - openssh
+  - rsync
+  - reflector
+  - virt-manager
+  - qemu
+  - qemu-arch-extra
+  - edk2-ovmf
+  - bridge-utils
+  - dnsmasq
+  - vde2
+  - openbsd-netcat
+  - iptables-nft
+  - ipset
+  - firewalld
+  - flatpak
+  - ntfs-3g
+  - noto-fonts
+  - noto-fonts-cjk
+  - noto-fonts-emoji
+  - ttf-jetbrains-mono
+  - ttf-fira-code
+  - ttf-fira-mono
+  - ttf-fira-sans
 
 intel_cpu_pkg:
   - intel-ucode
@@ -27,3 +74,29 @@ nvidia_gpu_pkg:
 
 amd_gpu_pkg:
   - vulkan-radeon
+
+grub_pkg:
+  - grub
+  - grub-btrfs
+
+gnome_pkg:
+  - gnome
+  - gnome-tweaks
+
+plasma_pkg:
+  - plasma
+  - plasma-desktop
+  - sddm
+  - konsole
+  - plasma-wayland-session
+  - kde-system-meta
+  - kde-utilities-meta
+  - elisa
+  - dragon
+
+services:
+  - NetworkManager
+  - bluetooth
+  - firewalld
+  - cups
+  - sshd

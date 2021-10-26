@@ -25,12 +25,14 @@ func (s *Selection) PerformSelection() error {
 		return err
 	}
 	s.FileSystemSelection()
+	s.BootloaderSelection()
 	s.HostnameSelection()
 	s.RootPassSelection()
 	s.SuperUserSelection()
 	s.OptionalUserSelection()
 	s.ProcessorSelection()
 	s.GPUSelection()
+	s.DesktopSelection()
 
 	return nil
 }
@@ -125,6 +127,29 @@ func (s *Selection) FileSystemSelection() {
 
 // func (s *Selection) EncryptionSelection() {
 // }
+
+func (s *Selection) BootloaderSelection() {
+	for {
+		fmt.Print("\n\n")
+		fmt.Println("-----Bootloader-----")
+		fmt.Println("1. systemd-boot")
+		fmt.Println("2. grub")
+		fmt.Print("Select desired bootloader : ")
+
+		var res string
+		fmt.Scanln(&res)
+		if strings.TrimSpace(res) == "1" {
+			s.cfg.BootLoader = "systemd-boot"
+			fmt.Println(s.cfg.BootLoader)
+			break
+		} else if strings.TrimSpace(res) == "2" {
+			s.cfg.BootLoader = "grub"
+			fmt.Println(s.cfg.BootLoader)
+			break
+		}
+		continue
+	}
+}
 
 func (s *Selection) HostnameSelection() {
 	fmt.Print("\n\n")
@@ -321,6 +346,29 @@ func (s *Selection) GPUSelection() {
 		} else if strings.TrimSpace(res) == "3" {
 			s.cfg.GPU = "amd"
 			fmt.Println(s.cfg.GPU)
+			break
+		}
+		continue
+	}
+}
+
+func (s *Selection) DesktopSelection() {
+	for {
+		fmt.Print("\n\n")
+		fmt.Println("-----Desktop GUI-----")
+		fmt.Println("1. gnome")
+		fmt.Println("2. plasma")
+		fmt.Print("Select desktop environment : ")
+
+		var res string
+		fmt.Scanln(&res)
+		if strings.TrimSpace(res) == "1" {
+			s.cfg.Desktop = "gnome"
+			fmt.Println(s.cfg.Desktop)
+			break
+		} else if strings.TrimSpace(res) == "2" {
+			s.cfg.Desktop = "plasma"
+			fmt.Println(s.cfg.Desktop)
 			break
 		}
 		continue
