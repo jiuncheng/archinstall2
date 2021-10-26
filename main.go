@@ -154,14 +154,14 @@ func main() {
 	}
 
 	for _, superuser := range cfg.Superusers {
-		err = cmd.NewCmd("arch-chroot /mnt useradd -mG wheel -s /bin/bash -p " + superuser.Password + " " + superuser.Username).Run()
+		err = cmd.NewCmd("arch-chroot /mnt useradd -mG wheel -s /bin/zsh -p " + superuser.Password + " " + superuser.Username).Run()
 		if err != nil {
 			log.Fatalln(err.Error())
 		}
 	}
 
 	for _, user := range cfg.Users {
-		err = cmd.NewCmd("arch-chroot /mnt useradd -m -s /bin/bash -p " + user.Password + " " + user.Username).Run()
+		err = cmd.NewCmd("arch-chroot /mnt useradd -m -s /bin/zsh -p " + user.Password + " " + user.Username).Run()
 		if err != nil {
 			log.Fatalln(err.Error())
 		}

@@ -26,7 +26,7 @@ pacstrap_pkg:
 extra_pkg:
   - vlc
   - bluez
-  - bluez-util
+  - bluez-utils
   - networkmanager
   - network-manager-applet
   - wpa_supplicant
@@ -60,6 +60,10 @@ extra_pkg:
   - ttf-fira-code
   - ttf-fira-mono
   - ttf-fira-sans
+  - zsh
+  - zsh-autosuggestions
+  - zsh-completions
+  - zsh-syntax-highlighting
 
 intel_cpu_pkg:
   - intel-ucode
