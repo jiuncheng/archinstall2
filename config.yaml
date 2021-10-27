@@ -63,6 +63,8 @@ extra_pkg:
   - ttf-fira-sans
   - vivaldi
   - vivaldi-ffmpeg-codecs
+  - neofetch
+  - htop
 
 intel_cpu_pkg:
   - intel-ucode

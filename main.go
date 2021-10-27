@@ -253,6 +253,11 @@ func main() {
 		log.Fatalln(err.Error())
 	}
 
+	err = cmd.NewCmd("arch-chroot /mnt /usr/bin/runuser -u " + cfg.Superusers[0].Username + " -- git clone https://aur.archlinux.org/paru-bin").Run()
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
 	err = EnableServices(cfg)
 	if err != nil {
 		log.Fatalln(err.Error())
