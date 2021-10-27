@@ -168,10 +168,10 @@ func main() {
 		}
 	}
 
-	err = cmd.NewCmd("arch-chroot /mnt sed -i \"s/^# *\\(%wheel  ALL=(ALL)       ALL	\\)/\\1/\" /etc/sudoers").SetDesc("Allowing wheel group to run sudo command...").Run()
-	if err != nil {
-		log.Fatalln(err.Error())
-	}
+	// err = cmd.NewCmd("arch-chroot /mnt sed -i \"s/^# *\\(%wheel  ALL=(ALL)       ALL	\\)/\\1/\" /etc/sudoers").SetDesc("Allowing wheel group to run sudo command...").Run()
+	// if err != nil {
+	// 	log.Fatalln(err.Error())
+	// }
 
 	if cfg.BootLoader == "grub" {
 		err = cmd.NewCmd("arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB --removable").SetDesc("Creating grub bootloader...").Run()
