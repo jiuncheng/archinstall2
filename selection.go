@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"strings"
 
+	"github.com/jiuncheng/archinstall2/cmd"
 	"github.com/jiuncheng/archinstall2/disklist"
 	"github.com/jiuncheng/archinstall2/sysconfig"
 )
@@ -24,6 +25,11 @@ func (s *Selection) PerformSelection() error {
 	if err != nil {
 		return err
 	}
+	err = s.TimezoneSelection()
+	if err != nil {
+		return err
+	}
+
 	s.FileSystemSelection()
 	s.BootloaderSelection()
 	s.HostnameSelection()
@@ -99,13 +105,38 @@ func (s *Selection) LayoutSelection() error {
 	}
 }
 
-// func (s *Selection) TimezoneSelection() error {
-// 	fmt.Println("Enter your timezone")
-// 	out, err := exec.Command("sh", "-c", "timedatectl list-timezones | grep ").Output()
-// 	if err != nil {
-// 		return err
-// 	}
-// }
+func (s *Selection) TimezoneSelection() error {
+	for {
+		fmt.Print("\n\n")
+		fmt.Println("Select and choose your timezone. Enter ? to search for available timezones.")
+		fmt.Print("Enter your choice (default: Asia/Kuala_Lumpur) : ")
+		var res string
+		fmt.Scanln(&res)
+		res = strings.TrimSpace(res)
+		if res == "?" {
+			var searchString string
+			fmt.Print("\nType here to search for timezones : ")
+			fmt.Scanln(&searchString)
+			out, err := exec.Command("sh", "-c", "timedatectl list-timezones | grep "+searchString).Output()
+			if err != nil {
+				continue
+			}
+			fmt.Println(string(out))
+			continue
+		} else {
+			err := cmd.NewCmd("ls /usr/share/zoneinfo/" + res).Run()
+			if err != nil {
+				fmt.Print("The timezone entered is not valid. Press enter to try again.")
+				fmt.Scanln()
+				continue
+			}
+			s.cfg.Timezone = res
+			break
+		}
+	}
+
+	return nil
+}
 
 func (s *Selection) FileSystemSelection() {
 	for {
