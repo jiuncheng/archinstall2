@@ -206,6 +206,13 @@ func main() {
 		}
 	}
 
+	wheelContent := "%wheel\tALL=(ALL)\tALL\n"
+	fmt.Println("Writing sudoers.d file to enable wheel group...")
+	err = ioutil.WriteFile("/mnt/etc/sudoers.d/wheel", []byte(wheelContent), 0644)
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
 	err = EnableServices(cfg)
 	if err != nil {
 		log.Fatalln(err.Error())
