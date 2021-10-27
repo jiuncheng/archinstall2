@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 	"os/exec"
 	"strings"
 
@@ -127,12 +128,25 @@ func (s *Selection) TimezoneSelection() error {
 			fmt.Println(s.cfg.Timezone)
 			break
 		} else {
-			err := exec.Command("sh", "-c", "timedatectl list-timezones | grep "+res).Run()
-			if err != nil {
+			info, err := os.Stat("/usr/share/zoneinfo/" + res)
+			if os.IsNotExist(err) {
 				fmt.Print("The timezone entered is not valid. Press enter to try again.")
 				fmt.Scanln()
 				continue
 			}
+
+			if info.IsDir() {
+				fmt.Print("The timezone entered is not valid. Press enter to try again.")
+				fmt.Scanln()
+				continue
+			}
+
+			// err := exec.Command("sh", "-c", "timedatectl list-timezones | grep "+res).Run()
+			// if err != nil {
+			// 	fmt.Print("The timezone entered is not valid. Press enter to try again.")
+			// 	fmt.Scanln()
+			// 	continue
+			// }
 			s.cfg.Timezone = res
 			fmt.Println(s.cfg.Timezone)
 			break
