@@ -184,7 +184,7 @@ func main() {
 	// 	log.Fatalln(err.Error())
 	// }
 
-	execCMD := exec.Command("arch-chroot", "/mnt", "chpasswd")
+	execCMD := exec.Command("arch-chroot", "/mnt", "passwd")
 	stdin, err := execCMD.StdinPipe()
 	if err != nil {
 		log.Fatalln(err.Error())
@@ -193,25 +193,19 @@ func main() {
 	io.WriteString(stdin, cfg.RootPassword)
 
 	for _, superuser := range cfg.Superusers {
-		err = cmd.NewCmd("arch-chroot /mnt useradd -mG wheel -s /bin/zsh " + superuser.Username).Run()
-		if err != nil {
-			log.Fatalln(err.Error())
-		}
-
-		cmd := exec.Command("arch-chroot", "/mnt", "chpasswd", superuser.Username)
-		stdin, err := cmd.StdinPipe()
+		err = cmd.NewCmd("arch-chroot /mnt useradd -mG wheel -s /bin/fish -p " + superuser.Password + " " + superuser.Username).Run()
 		if err != nil {
 			log.Fatalln(err.Error())
 		}
 		fmt.Println(superuser.Password)
-		io.WriteString(stdin, superuser.Password)
 	}
 
 	for _, user := range cfg.Users {
-		err = cmd.NewCmd("arch-chroot /mnt useradd -m -s /bin/zsh " + user.Username).Run()
+		err = cmd.NewCmd("arch-chroot /mnt useradd -m -s /bin/fish -p " + user.Password + " " + user.Username).Run()
 		if err != nil {
 			log.Fatalln(err.Error())
 		}
+		fmt.Println(user.Password)
 
 		cmd := exec.Command("arch-chroot", "/mnt", "chpasswd", user.Username)
 		stdin, err := cmd.StdinPipe()
@@ -221,11 +215,6 @@ func main() {
 		fmt.Println(user.Password)
 		io.WriteString(stdin, user.Password)
 	}
-
-	// err = cmd.NewCmd("arch-chroot /mnt sed -i \"s/^# *\\(%wheel  ALL=(ALL)       ALL	\\)/\\1/\" /etc/sudoers").SetDesc("Allowing wheel group to run sudo command...").Run()
-	// if err != nil {
-	// 	log.Fatalln(err.Error())
-	// }
 
 	if cfg.BootLoader == "grub" {
 		err = cmd.NewCmd("arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB --removable").SetDesc("Creating grub bootloader...").Run()
