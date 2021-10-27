@@ -32,6 +32,7 @@ func main() {
 	cfg := sysconfig.NewSysConfig()
 	cfg.Services = viper.GetStringSlice("services")
 	cfg.Package.PacstrapPkg = viper.GetStringSlice("pacstrap_pkg")
+	cfg.Package.GrubPkg = viper.GetStringSlice("grub_pkg")
 	cfg.Package.IntelCPUPkg = viper.GetStringSlice("intel_cpu_pkg")
 	cfg.Package.AmdCPUPkg = viper.GetStringSlice("amd_cpu_pkg")
 	cfg.Package.NvidiaGPUPkg = viper.GetStringSlice("nvidia_gpu_pkg")
@@ -198,7 +199,7 @@ func main() {
 		if err != nil {
 			log.Fatalln(err.Error())
 		}
-		archContent := "title Arch Linux\nlinux /vmlinuz-linux\ninitrd /" + cfg.Processor + "-ucode.img\ninitrd /initramfs-linux.img\noptions root=UUID=" + string(uuid) + " rootflags=\"subvol=@\" rw\n"
+		archContent := "title Arch Linux\nlinux /vmlinuz-linux\ninitrd /" + cfg.Processor + "-ucode.img\ninitrd /initramfs-linux.img\noptions root=UUID=" + strings.Trim(string(uuid), "\n") + " rootflags=\"subvol=@\" rw\n"
 		err = ioutil.WriteFile("/mnt/boot/loader/entries/arch.conf", []byte(archContent), 0644)
 		if err != nil {
 			log.Fatalln(err.Error())
@@ -227,7 +228,7 @@ func main() {
 
 func EnableServices(cfg *sysconfig.SysConfig) error {
 	for _, service := range cfg.Services {
-		err := cmd.NewCmd("arch-chroot /mnt systemctl enable " + service).SetDesc("Enabling" + service + " service").Run()
+		err := cmd.NewCmd("arch-chroot /mnt systemctl enable " + service).SetDesc("Enabling " + service + " service...").Run()
 		if err != nil {
 			return err
 		}
