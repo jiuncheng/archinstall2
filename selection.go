@@ -358,6 +358,7 @@ func (s *Selection) DesktopSelection() {
 		fmt.Println("-----Desktop GUI-----")
 		fmt.Println("1. gnome")
 		fmt.Println("2. plasma")
+		fmt.Println("2. cutefish")
 		fmt.Print("Select desktop environment : ")
 
 		var res string
@@ -368,6 +369,10 @@ func (s *Selection) DesktopSelection() {
 			break
 		} else if strings.TrimSpace(res) == "2" {
 			s.cfg.Desktop = "plasma"
+			fmt.Println(s.cfg.Desktop)
+			break
+		} else if strings.TrimSpace(res) == "3" {
+			s.cfg.Desktop = "cutefish"
 			fmt.Println(s.cfg.Desktop)
 			break
 		}

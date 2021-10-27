@@ -22,6 +22,7 @@ pacstrap_pkg:
   - pipewire-alsa
   - pipewire-pulse
   - os-prober
+  - fish
 
 extra_pkg:
   - vlc
@@ -60,10 +61,8 @@ extra_pkg:
   - ttf-fira-code
   - ttf-fira-mono
   - ttf-fira-sans
-  - zsh
-  - zsh-autosuggestions
-  - zsh-completions
-  - zsh-syntax-highlighting
+  - vivaldi
+  - vivaldi-ffmpeg-codecs
 
 intel_cpu_pkg:
   - intel-ucode

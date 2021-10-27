@@ -1,0 +1,11 @@
+desktop_pkg:
+  - cutefish
+  - sddm
+
+services:
+  - NetworkManager
+  - bluetooth
+  - firewalld
+  - cups
+  - sshd
+  - sddm

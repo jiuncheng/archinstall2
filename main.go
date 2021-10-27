@@ -50,7 +50,7 @@ func main() {
 		desktopConf := viper.New()
 		desktopConf.SetConfigName("gnome")
 		desktopConf.SetConfigType("yaml")
-		desktopConf.AddConfigPath(".")
+		desktopConf.AddConfigPath("./desktop")
 		err = desktopConf.ReadInConfig()
 		if err != nil {
 			panic(fmt.Errorf("fatal error config file: %w", err))
@@ -61,7 +61,18 @@ func main() {
 		desktopConf := viper.New()
 		desktopConf.SetConfigName("plasma")
 		desktopConf.SetConfigType("yaml")
-		desktopConf.AddConfigPath(".")
+		desktopConf.AddConfigPath("./desktop")
+		err = desktopConf.ReadInConfig()
+		if err != nil {
+			panic(fmt.Errorf("fatal error config file: %w", err))
+		}
+		cfg.Package.DesktopPkg = desktopConf.GetStringSlice("desktop_pkg")
+		cfg.Services = desktopConf.GetStringSlice("services")
+	} else if cfg.Desktop == "cutefish" {
+		desktopConf := viper.New()
+		desktopConf.SetConfigName("cutefish")
+		desktopConf.SetConfigType("yaml")
+		desktopConf.AddConfigPath("./desktop")
 		err = desktopConf.ReadInConfig()
 		if err != nil {
 			panic(fmt.Errorf("fatal error config file: %w", err))
