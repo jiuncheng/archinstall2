@@ -1,0 +1,11 @@
+desktop_pkg:
+  - gnome
+  - gnome-tweaks
+
+services:
+  - NetworkManager
+  - bluetooth
+  - firewalld
+  - cups
+  - sshd
+  - gdm

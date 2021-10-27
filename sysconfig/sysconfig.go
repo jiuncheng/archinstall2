@@ -27,9 +27,8 @@ type Package struct {
 	AmdCPUPkg    []string
 	NvidiaGPUPkg []string
 	AmdGPUPkg    []string
-	GnomePkg     []string
-	PlasmaPkg    []string
 	GrubPkg      []string
+	DesktopPkg   []string
 }
 
 type User struct {

@@ -1,0 +1,18 @@
+desktop_pkg:
+  - plasma
+  - plasma-desktop
+  - sddm
+  - konsole
+  - plasma-wayland-session
+  - kde-system-meta
+  - kde-utilities-meta
+  - elisa
+  - dragon
+
+services:
+  - NetworkManager
+  - bluetooth
+  - firewalld
+  - cups
+  - sshd
+  - sddm

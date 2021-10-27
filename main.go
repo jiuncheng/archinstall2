@@ -2,9 +2,11 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"os"
+	"os/exec"
 	"strings"
 
 	"github.com/jiuncheng/archinstall2/cmd"
@@ -15,10 +17,11 @@ import (
 )
 
 func main() {
-	viper.SetConfigName("config")
-	viper.SetConfigType("yaml")
-	viper.AddConfigPath(".")
-	err := viper.ReadInConfig()
+	globalConf := viper.New()
+	globalConf.SetConfigName("config")
+	globalConf.SetConfigType("yaml")
+	globalConf.AddConfigPath(".")
+	err := globalConf.ReadInConfig()
 	if err != nil {
 		panic(fmt.Errorf("fatal error config file: %w", err))
 	}
@@ -30,20 +33,41 @@ func main() {
 	cmd.NewCmd("umount -a").SetDesc("Umounting all drives").Run()
 
 	cfg := sysconfig.NewSysConfig()
-	cfg.Services = viper.GetStringSlice("services")
-	cfg.Package.PacstrapPkg = viper.GetStringSlice("pacstrap_pkg")
-	cfg.Package.GrubPkg = viper.GetStringSlice("grub_pkg")
-	cfg.Package.IntelCPUPkg = viper.GetStringSlice("intel_cpu_pkg")
-	cfg.Package.AmdCPUPkg = viper.GetStringSlice("amd_cpu_pkg")
-	cfg.Package.NvidiaGPUPkg = viper.GetStringSlice("nvidia_gpu_pkg")
-	cfg.Package.AmdGPUPkg = viper.GetStringSlice("amd_gpu_pkg")
-	cfg.Package.GnomePkg = viper.GetStringSlice("gnome_pkg")
-	cfg.Package.PlasmaPkg = viper.GetStringSlice("plasma_pkg")
-	cfg.Package.ExtraPkg = viper.GetStringSlice("extra_pkg")
+	cfg.Package.PacstrapPkg = globalConf.GetStringSlice("pacstrap_pkg")
+	cfg.Package.GrubPkg = globalConf.GetStringSlice("grub_pkg")
+	cfg.Package.IntelCPUPkg = globalConf.GetStringSlice("intel_cpu_pkg")
+	cfg.Package.AmdCPUPkg = globalConf.GetStringSlice("amd_cpu_pkg")
+	cfg.Package.NvidiaGPUPkg = globalConf.GetStringSlice("nvidia_gpu_pkg")
+	cfg.Package.AmdGPUPkg = globalConf.GetStringSlice("amd_gpu_pkg")
+	cfg.Package.ExtraPkg = globalConf.GetStringSlice("extra_pkg")
 
 	err = NewSelection(cfg).PerformSelection()
 	if err != nil {
 		log.Fatalln(err.Error())
+	}
+
+	if cfg.Desktop == "gnome" {
+		desktopConf := viper.New()
+		desktopConf.SetConfigName("gnome")
+		desktopConf.SetConfigType("yaml")
+		desktopConf.AddConfigPath(".")
+		err = desktopConf.ReadInConfig()
+		if err != nil {
+			panic(fmt.Errorf("fatal error config file: %w", err))
+		}
+		cfg.Package.DesktopPkg = desktopConf.GetStringSlice("desktop_pkg")
+		cfg.Services = desktopConf.GetStringSlice("services")
+	} else if cfg.Desktop == "plasma" {
+		desktopConf := viper.New()
+		desktopConf.SetConfigName("plasma")
+		desktopConf.SetConfigType("yaml")
+		desktopConf.AddConfigPath(".")
+		err = desktopConf.ReadInConfig()
+		if err != nil {
+			panic(fmt.Errorf("fatal error config file: %w", err))
+		}
+		cfg.Package.DesktopPkg = desktopConf.GetStringSlice("desktop_pkg")
+		cfg.Services = desktopConf.GetStringSlice("services")
 	}
 
 	err = diskutil.NewDiskUtil(cfg).CreateBTRFS()
@@ -66,12 +90,7 @@ func main() {
 		gpuArgs = strings.Join(cfg.Package.AmdGPUPkg, " ")
 	}
 
-	var guiArgs string
-	if cfg.Desktop == "gnome" {
-		guiArgs = strings.Join(cfg.Package.GnomePkg, " ")
-	} else if cfg.Desktop == "plasma" {
-		guiArgs = strings.Join(cfg.Package.PlasmaPkg, " ")
-	}
+	guiArgs := strings.Join(cfg.Package.DesktopPkg, " ")
 
 	var bootloaderArgs string
 	if cfg.BootLoader == "grub" {
@@ -149,23 +168,44 @@ func main() {
 		log.Fatal(err)
 	}
 
-	err = cmd.NewCmd("/bin/bash -c \"arch-chroot /mnt echo root:" + cfg.RootPassword + " | " + "chpasswd\"").Run()
+	// err = cmd.NewCmd("/bin/bash -c \"arch-chroot /mnt echo root:" + cfg.RootPassword + " | " + "chpasswd\"").Run()
+	// if err != nil {
+	// 	log.Fatalln(err.Error())
+	// }
+
+	execCMD := exec.Command("arch-chroot", "/mnt", "chpasswd")
+	stdin, err := execCMD.StdinPipe()
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
+	io.WriteString(stdin, "pgc:"+cfg.RootPassword)
 
 	for _, superuser := range cfg.Superusers {
-		err = cmd.NewCmd("arch-chroot /mnt useradd -mG wheel -s /bin/zsh -p " + superuser.Password + " " + superuser.Username).Run()
+		err = cmd.NewCmd("arch-chroot /mnt useradd -mG wheel -s /bin/zsh " + superuser.Username).Run()
 		if err != nil {
 			log.Fatalln(err.Error())
 		}
+
+		cmd := exec.Command("arch-chroot", "/mnt", "chpasswd", superuser.Username)
+		stdin, err := cmd.StdinPipe()
+		if err != nil {
+			log.Fatalln(err.Error())
+		}
+		io.WriteString(stdin, "pgc:"+superuser.Password)
 	}
 
 	for _, user := range cfg.Users {
-		err = cmd.NewCmd("arch-chroot /mnt useradd -m -s /bin/zsh -p " + user.Password + " " + user.Username).Run()
+		err = cmd.NewCmd("arch-chroot /mnt useradd -m -s /bin/zsh " + user.Username).Run()
 		if err != nil {
 			log.Fatalln(err.Error())
 		}
+
+		cmd := exec.Command("arch-chroot", "/mnt", "chpasswd", user.Username)
+		stdin, err := cmd.StdinPipe()
+		if err != nil {
+			log.Fatalln(err.Error())
+		}
+		io.WriteString(stdin, "pgc:"+user.Password)
 	}
 
 	// err = cmd.NewCmd("arch-chroot /mnt sed -i \"s/^# *\\(%wheel  ALL=(ALL)       ALL	\\)/\\1/\" /etc/sudoers").SetDesc("Allowing wheel group to run sudo command...").Run()
@@ -216,18 +256,6 @@ func main() {
 	err = EnableServices(cfg)
 	if err != nil {
 		log.Fatalln(err.Error())
-	}
-
-	if cfg.Desktop == "gnome" {
-		err := cmd.NewCmd("arch-chroot /mnt systemctl enable gdm").SetDesc("Enabling gdm service").Run()
-		if err != nil {
-			log.Fatalln(err.Error())
-		}
-	} else if cfg.Desktop == "plasma" {
-		err := cmd.NewCmd("arch-chroot /mnt systemctl enable sddm").SetDesc("Enabling sddm service").Run()
-		if err != nil {
-			log.Fatalln(err.Error())
-		}
 	}
 
 	fmt.Println("Installation done. You will now be able to reboot.")
