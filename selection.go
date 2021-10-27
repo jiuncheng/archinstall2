@@ -184,7 +184,7 @@ func (s *Selection) RootPassSelection() {
 			fmt.Println("Password does not match. Try again.")
 			continue
 		}
-		s.cfg.RootPassword = strings.TrimSpace(password2)
+		s.cfg.RootPassword = strings.TrimSpace(password)
 		break
 	}
 }
@@ -222,7 +222,7 @@ func (s *Selection) SuperUserSelection() {
 			fmt.Println("Password does not match. Try again.")
 			continue
 		}
-		user.Password = strings.TrimSpace(password2)
+		user.Password = strings.TrimSpace(password)
 		break
 	}
 	s.cfg.Superusers = append(s.cfg.Superusers, user)
@@ -277,7 +277,7 @@ func (s *Selection) OptionalUserSelection() {
 				fmt.Println("Password does not match. Try again.")
 				continue
 			}
-			user.Password = strings.TrimSpace(password2)
+			user.Password = strings.TrimSpace(password)
 			break
 		}
 

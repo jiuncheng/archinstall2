@@ -178,7 +178,8 @@ func main() {
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
-	io.WriteString(stdin, "pgc:"+cfg.RootPassword)
+	fmt.Println(cfg.RootPassword)
+	io.WriteString(stdin, cfg.RootPassword)
 
 	for _, superuser := range cfg.Superusers {
 		err = cmd.NewCmd("arch-chroot /mnt useradd -mG wheel -s /bin/zsh " + superuser.Username).Run()
@@ -191,7 +192,8 @@ func main() {
 		if err != nil {
 			log.Fatalln(err.Error())
 		}
-		io.WriteString(stdin, "pgc:"+superuser.Password)
+		fmt.Println(superuser.Password)
+		io.WriteString(stdin, superuser.Password)
 	}
 
 	for _, user := range cfg.Users {
@@ -205,7 +207,8 @@ func main() {
 		if err != nil {
 			log.Fatalln(err.Error())
 		}
-		io.WriteString(stdin, "pgc:"+user.Password)
+		fmt.Println(user.Password)
+		io.WriteString(stdin, user.Password)
 	}
 
 	// err = cmd.NewCmd("arch-chroot /mnt sed -i \"s/^# *\\(%wheel  ALL=(ALL)       ALL	\\)/\\1/\" /etc/sudoers").SetDesc("Allowing wheel group to run sudo command...").Run()
