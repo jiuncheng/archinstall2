@@ -99,9 +99,13 @@ func (s *Selection) LayoutSelection() error {
 	}
 }
 
-func (s *Selection) TimezoneSelection() {
-
-}
+// func (s *Selection) TimezoneSelection() error {
+// 	fmt.Println("Enter your timezone")
+// 	out, err := exec.Command("sh", "-c", "timedatectl list-timezones | grep ").Output()
+// 	if err != nil {
+// 		return err
+// 	}
+// }
 
 func (s *Selection) FileSystemSelection() {
 	for {

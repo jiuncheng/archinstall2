@@ -16,7 +16,7 @@ func RunPrerequisites() error {
 		return err
 	}
 
-	err = cmd.NewCmd("sed -i 's/^#Para/Para/' /etc/pacman.conf").SetDesc("Enabling parallel download..").Run()
+	err = cmd.NewCmd("sed -i s/^#Para/Para/ /etc/pacman.conf").SetDesc("Enabling parallel download..").Run()
 	if err != nil {
 		return err
 	}
