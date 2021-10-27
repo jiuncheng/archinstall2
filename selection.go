@@ -358,7 +358,7 @@ func (s *Selection) DesktopSelection() {
 		fmt.Println("-----Desktop GUI-----")
 		fmt.Println("1. gnome")
 		fmt.Println("2. plasma")
-		fmt.Println("2. cutefish")
+		fmt.Println("3. cutefish")
 		fmt.Print("Select desktop environment : ")
 
 		var res string

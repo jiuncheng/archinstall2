@@ -25,12 +25,6 @@ func main() {
 	if err != nil {
 		panic(fmt.Errorf("fatal error config file: %w", err))
 	}
-	// Prerequisite
-	err = cmd.NewCmd("timedatectl set-ntp true").SetDesc("Syncing datetime to ntp server...").Run()
-	if err != nil {
-		log.Fatalln(err.Error())
-	}
-	cmd.NewCmd("umount -a").SetDesc("Umounting all drives").Run()
 
 	cfg := sysconfig.NewSysConfig()
 	cfg.Package.PacstrapPkg = globalConf.GetStringSlice("pacstrap_pkg")
@@ -40,6 +34,11 @@ func main() {
 	cfg.Package.NvidiaGPUPkg = globalConf.GetStringSlice("nvidia_gpu_pkg")
 	cfg.Package.AmdGPUPkg = globalConf.GetStringSlice("amd_gpu_pkg")
 	cfg.Package.ExtraPkg = globalConf.GetStringSlice("extra_pkg")
+
+	err = RunPrerequisites()
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
 
 	err = NewSelection(cfg).PerformSelection()
 	if err != nil {
