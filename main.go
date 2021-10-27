@@ -116,7 +116,7 @@ func main() {
 		log.Fatalln(err.Error())
 	}
 
-	err = cmd.NewCmd("arch-chroot /mnt ln -sf /usr/share/zoneinfo/Asia/Kuala_Lumpur /etc/localtime").SetDesc("Symlinking Asia/Kuala Lumpur time to /etc/localtime...").Run()
+	err = cmd.NewCmd("arch-chroot /mnt ln -sf /usr/share/zoneinfo/" + cfg.Timezone + " /etc/localtime").SetDesc("Symlinking Asia/Kuala Lumpur time to /etc/localtime...").Run()
 	if err != nil {
 		log.Fatalln(err.Error())
 	}

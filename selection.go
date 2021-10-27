@@ -123,6 +123,9 @@ func (s *Selection) TimezoneSelection() error {
 			}
 			fmt.Println(string(out))
 			continue
+		} else if res == "" {
+			s.cfg.Timezone = "Asia/Kuala_Lumpur"
+			break
 		} else {
 			err := cmd.NewCmd("ls /usr/share/zoneinfo/" + res).Run()
 			if err != nil {
