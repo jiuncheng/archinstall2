@@ -55,9 +55,9 @@ func (c *Command) Run() error {
 	fmt.Printf("\n%s\n", c.desc)
 	fmt.Printf("Executing command : %s\n", c.args)
 
-	for _, arg := range args {
-		log.Println(arg)
-	}
+	// for _, arg := range args {
+	// 	log.Println(arg)
+	// }
 
 	var cmd *exec.Cmd
 	if len(args) < 2 {

@@ -2,11 +2,9 @@ package main
 
 import (
 	"fmt"
-	"io"
 	"io/ioutil"
 	"log"
 	"os"
-	"os/exec"
 	"strings"
 
 	"github.com/jiuncheng/archinstall2/cmd"
@@ -183,36 +181,31 @@ func main() {
 	// 	log.Fatalln(err.Error())
 	// }
 
-	execCMD := exec.Command("arch-chroot", "/mnt", "passwd")
-	stdin, err := execCMD.StdinPipe()
+	err = cmd.NewCmd(fmt.Sprintf(`arch-chroot /mnt sh -c "echo root:%s | chpasswd"`, cfg.RootPassword)).Run()
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
-	fmt.Println(cfg.RootPassword)
-	io.WriteString(stdin, cfg.RootPassword)
 
 	for _, superuser := range cfg.Superusers {
-		err = cmd.NewCmd("arch-chroot /mnt useradd -mG wheel -s /bin/fish -p " + superuser.Password + " " + superuser.Username).Run()
+		err = cmd.NewCmd("arch-chroot /mnt useradd -mG wheel -s /bin/fish " + superuser.Username).Run()
 		if err != nil {
 			log.Fatalln(err.Error())
 		}
-		fmt.Println(superuser.Password)
+		err = cmd.NewCmd(fmt.Sprintf(`arch-chroot /mnt sh -c "echo %s:%s | chpasswd"`, superuser.Username, superuser.Password)).Run()
+		if err != nil {
+			log.Fatalln(err.Error())
+		}
 	}
 
 	for _, user := range cfg.Users {
-		err = cmd.NewCmd("arch-chroot /mnt useradd -m -s /bin/fish -p " + user.Password + " " + user.Username).Run()
+		err = cmd.NewCmd("arch-chroot /mnt useradd -m -s /bin/fish " + user.Username).Run()
 		if err != nil {
 			log.Fatalln(err.Error())
 		}
-		fmt.Println(user.Password)
-
-		cmd := exec.Command("arch-chroot", "/mnt", "chpasswd", user.Username)
-		stdin, err := cmd.StdinPipe()
+		err = cmd.NewCmd(fmt.Sprintf(`arch-chroot /mnt sh -c "echo %s:%s | chpasswd"`, user.Username, user.Password)).Run()
 		if err != nil {
 			log.Fatalln(err.Error())
 		}
-		fmt.Println(user.Password)
-		io.WriteString(stdin, user.Password)
 	}
 
 	if cfg.BootLoader == "grub" {

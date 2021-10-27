@@ -99,6 +99,10 @@ func (s *Selection) LayoutSelection() error {
 	}
 }
 
+func (s *Selection) TimezoneSelection() {
+
+}
+
 func (s *Selection) FileSystemSelection() {
 	for {
 		fmt.Print("\n\n")
