@@ -88,18 +88,17 @@ func (s *Selection) LayoutSelection() error {
 		fmt.Scanln(&res)
 
 		if strings.TrimSpace(res) == "us" || strings.TrimSpace(res) == "" {
+			s.cfg.KBLayout = strings.TrimSpace("us")
+		} else {
 			s.cfg.KBLayout = strings.TrimSpace(res)
-			fmt.Println(s.cfg.KBLayout)
-			return nil
 		}
 
-		err = exec.Command("localectl", "set-keymap", res).Run()
+		err = exec.Command("localectl", "set-keymap", s.cfg.KBLayout).Run()
 		if err != nil {
 			fmt.Print("Keymap is invalid. Press enter to select again : ")
 			fmt.Scanln()
 			continue
 		}
-		s.cfg.KBLayout = strings.TrimSpace(res)
 		fmt.Println(s.cfg.KBLayout)
 		return nil
 	}
@@ -416,6 +415,7 @@ func (s *Selection) DesktopSelection() {
 		fmt.Println("1. gnome")
 		fmt.Println("2. plasma")
 		fmt.Println("3. cutefish")
+		fmt.Println("4. no desktop environment")
 		fmt.Print("Select desktop environment : ")
 
 		var res string
@@ -430,6 +430,10 @@ func (s *Selection) DesktopSelection() {
 			break
 		} else if strings.TrimSpace(res) == "3" {
 			s.cfg.Desktop = "cutefish"
+			fmt.Println(s.cfg.Desktop)
+			break
+		} else if strings.TrimSpace(res) == "4" {
+			s.cfg.Desktop = "default"
 			fmt.Println(s.cfg.Desktop)
 			break
 		}

@@ -146,6 +146,11 @@ func main() {
 		log.Fatalln(err.Error())
 	}
 
+	err = ioutil.WriteFile("/mnt/etc/vconsole.conf", []byte(fmt.Sprintf("KEYMAP=%s\n", cfg.KBLayout)), 0644)
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
 	err = ioutil.WriteFile("/mnt/etc/hostname", []byte(cfg.Hostname+"\n"), 0644)
 	if err != nil {
 		log.Fatalln(err.Error())

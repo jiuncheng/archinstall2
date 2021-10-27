@@ -1,0 +1,8 @@
+desktop_pkg:
+
+services:
+  - NetworkManager
+  - bluetooth
+  - firewalld
+  - cups
+  - sshd
