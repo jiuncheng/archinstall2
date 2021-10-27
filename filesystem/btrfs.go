@@ -1,9 +1,8 @@
 package filesystem
 
 import (
-	"github.com/jiuncheng/archinstall2/cmd"
-	"github.com/jiuncheng/archinstall2/diskmount"
 	"github.com/jiuncheng/archinstall2/sysconfig"
+	"github.com/jiuncheng/archinstall2/utils"
 )
 
 type BtrfsHelper struct {
@@ -15,10 +14,10 @@ func NewBtrfsHelper(cfg *sysconfig.SysConfig) *BtrfsHelper {
 }
 
 func (b *BtrfsHelper) CreateSubvolume(subvol string) error {
-	return cmd.NewCmd("btrfs subvolume create /mnt/" + subvol).Run()
+	return utils.NewCmd("btrfs subvolume create /mnt/" + subvol).Run()
 }
 
-func (b *BtrfsHelper) MountMnt(dm *diskmount.DiskMount) error {
+func (b *BtrfsHelper) MountMnt(dm *utils.DiskMount) error {
 	return dm.MountWithDesc(b.cfg.InstallDisk+"2", "/mnt", "Mounting disk for btrfs subvolume creation...")
 }
 
@@ -38,41 +37,41 @@ func (b *BtrfsHelper) CreateVarLogSubvol() error {
 	return b.CreateSubvolume("@var_log")
 }
 
-func (b *BtrfsHelper) UmountMnt(dm *diskmount.DiskMount) error {
+func (b *BtrfsHelper) UmountMnt(dm *utils.DiskMount) error {
 	return dm.Umount("/mnt")
 }
 
 func (b *BtrfsHelper) MountRootSubvol() error {
-	dm := diskmount.NewDiskMount()
+	dm := utils.NewDiskMount()
 	dm.Options("noatime,compress=zstd,space_cache,discard=async,subvol=@")
 	return dm.MountWithDesc(b.cfg.InstallDisk+"2", "/mnt", "Remounting with BTRFS options...")
 }
 
 func (b *BtrfsHelper) MountHomeSubvol() error {
-	dm := diskmount.NewDiskMount()
+	dm := utils.NewDiskMount()
 	dm.Options("noatime,compress=zstd,space_cache,discard=async,subvol=@home")
 	return dm.Mount(b.cfg.InstallDisk+"2", "/mnt/home")
 }
 
 func (b *BtrfsHelper) MountSnapshotsSubvol() error {
-	dm := diskmount.NewDiskMount()
+	dm := utils.NewDiskMount()
 	dm.Options("noatime,compress=zstd,space_cache,discard=async,subvol=@snapshots")
 	return dm.Mount(b.cfg.InstallDisk+"2", "/mnt/.snapshots")
 }
 
 func (b *BtrfsHelper) MountVarLogSubvol() error {
-	dm := diskmount.NewDiskMount()
+	dm := utils.NewDiskMount()
 	dm.Options("noatime,compress=zstd,space_cache,discard=async,subvol=@var_log")
 	return dm.Mount(b.cfg.InstallDisk+"2", "/mnt/var/log")
 }
 
 func (b *BtrfsHelper) MountEFI() error {
-	dm := diskmount.NewDiskMount()
+	dm := utils.NewDiskMount()
 	return dm.MountWithDesc(b.cfg.InstallDisk+"1", "/mnt/boot", "Mounting EFI /boot...")
 }
 
 func (b *BtrfsHelper) GenerateBTRFSSystem() error {
-	dm := diskmount.NewDiskMount()
+	dm := utils.NewDiskMount()
 	b.MountMnt(dm)
 	b.CreateRootSubvol()
 	b.CreateHomeSubvol()
@@ -82,12 +81,12 @@ func (b *BtrfsHelper) GenerateBTRFSSystem() error {
 
 	b.MountRootSubvol()
 
-	err := cmd.NewCmd("mkdir -p /mnt/boot /mnt/home /mnt/var /mnt/.snapshots").Run()
+	err := utils.NewCmd("mkdir -p /mnt/boot /mnt/home /mnt/var /mnt/.snapshots").Run()
 	if err != nil {
 		return err
 	}
 
-	err = cmd.NewCmd("mkdir -p /mnt/var/log").Run()
+	err = utils.NewCmd("mkdir -p /mnt/var/log").Run()
 	if err != nil {
 		return err
 	}

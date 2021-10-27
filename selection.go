@@ -7,8 +7,8 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/jiuncheng/archinstall2/disklist"
 	"github.com/jiuncheng/archinstall2/sysconfig"
+	"github.com/jiuncheng/archinstall2/utils"
 )
 
 type Selection struct {
@@ -44,7 +44,7 @@ func (s *Selection) PerformSelection() error {
 }
 
 func (s *Selection) DiskSelection() {
-	dl, err := disklist.GetDiskList()
+	dl, err := utils.GetDiskList()
 	if err != nil {
 		log.Fatalln(err.Error())
 	}

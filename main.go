@@ -7,10 +7,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/jiuncheng/archinstall2/cmd"
-	"github.com/jiuncheng/archinstall2/diskutil"
 	"github.com/jiuncheng/archinstall2/filesystem"
 	"github.com/jiuncheng/archinstall2/sysconfig"
+	"github.com/jiuncheng/archinstall2/utils"
 	"github.com/spf13/viper"
 )
 
@@ -78,7 +77,7 @@ func main() {
 		cfg.Services = desktopConf.GetStringSlice("services")
 	}
 
-	err = diskutil.NewDiskUtil(cfg).CreateBTRFS()
+	err = utils.NewDiskUtil(cfg).CreateBTRFS()
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
@@ -105,38 +104,38 @@ func main() {
 		bootloaderArgs = strings.Join(cfg.Package.GrubPkg, " ")
 	}
 
-	cmd2 := cmd.NewCmd("pacstrap /mnt " + strings.Join(cfg.Package.PacstrapPkg, " ") + " " + strings.Join(cfg.Package.ExtraPkg, " ") + " " + cpuArgs + " " + gpuArgs + " " + guiArgs + " " + bootloaderArgs)
+	cmd2 := utils.NewCmd("pacstrap /mnt " + strings.Join(cfg.Package.PacstrapPkg, " ") + " " + strings.Join(cfg.Package.ExtraPkg, " ") + " " + cpuArgs + " " + gpuArgs + " " + guiArgs + " " + bootloaderArgs)
 	err = cmd2.SetDesc("Downloading packages from Pacstrap...").Run()
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
 
-	err = cmd.NewCmd("/bin/bash -c \"genfstab -U /mnt >> /mnt/etc/fstab\"").SetDesc("Generating FSTAB file...").Run()
+	err = utils.NewCmd("/bin/bash -c \"genfstab -U /mnt >> /mnt/etc/fstab\"").SetDesc("Generating FSTAB file...").Run()
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
 
-	err = cmd.NewCmd("arch-chroot /mnt ln -sf /usr/share/zoneinfo/" + cfg.Timezone + " /etc/localtime").SetDesc("Symlinking Asia/Kuala Lumpur time to /etc/localtime...").Run()
+	err = utils.NewCmd("arch-chroot /mnt ln -sf /usr/share/zoneinfo/" + cfg.Timezone + " /etc/localtime").SetDesc("Symlinking Asia/Kuala Lumpur time to /etc/localtime...").Run()
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
 
-	err = cmd.NewCmd("arch-chroot /mnt timedatectl set-ntp true").SetDesc("Syncing datetime to ntp server...").Run()
+	err = utils.NewCmd("arch-chroot /mnt timedatectl set-ntp true").SetDesc("Syncing datetime to ntp server...").Run()
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
 
-	err = cmd.NewCmd("arch-chroot /mnt hwclock --systohc").SetDesc("Setting hardware clock...").Run()
+	err = utils.NewCmd("arch-chroot /mnt hwclock --systohc").SetDesc("Setting hardware clock...").Run()
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
 
-	err = cmd.NewCmd("arch-chroot /mnt sed -i s/^#*\\(en_US.UTF-8\\)/\\1/ /etc/locale.gen").SetDesc("Generating en_US_utf-8 locale...").Run()
+	err = utils.NewCmd("arch-chroot /mnt sed -i s/^#*\\(en_US.UTF-8\\)/\\1/ /etc/locale.gen").SetDesc("Generating en_US_utf-8 locale...").Run()
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
 
-	err = cmd.NewCmd("arch-chroot /mnt locale-gen").Run()
+	err = utils.NewCmd("arch-chroot /mnt locale-gen").Run()
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
@@ -181,50 +180,50 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// err = cmd.NewCmd("/bin/bash -c \"arch-chroot /mnt echo root:" + cfg.RootPassword + " | " + "chpasswd\"").Run()
+	// err = utils.NewCmd("/bin/bash -c \"arch-chroot /mnt echo root:" + cfg.RootPassword + " | " + "chpasswd\"").Run()
 	// if err != nil {
 	// 	log.Fatalln(err.Error())
 	// }
 
-	err = cmd.NewCmd(fmt.Sprintf(`arch-chroot /mnt sh -c "echo root:%s | chpasswd"`, cfg.RootPassword)).Run()
+	err = utils.NewCmd(fmt.Sprintf(`arch-chroot /mnt sh -c "echo root:%s | chpasswd"`, cfg.RootPassword)).Run()
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
 
 	for _, superuser := range cfg.Superusers {
-		err = cmd.NewCmd("arch-chroot /mnt useradd -mG wheel -s /bin/fish " + superuser.Username).Run()
+		err = utils.NewCmd("arch-chroot /mnt useradd -mG wheel -s /bin/fish " + superuser.Username).Run()
 		if err != nil {
 			log.Fatalln(err.Error())
 		}
-		err = cmd.NewCmd(fmt.Sprintf(`arch-chroot /mnt sh -c "echo %s:%s | chpasswd"`, superuser.Username, superuser.Password)).Run()
+		err = utils.NewCmd(fmt.Sprintf(`arch-chroot /mnt sh -c "echo %s:%s | chpasswd"`, superuser.Username, superuser.Password)).Run()
 		if err != nil {
 			log.Fatalln(err.Error())
 		}
 	}
 
 	for _, user := range cfg.Users {
-		err = cmd.NewCmd("arch-chroot /mnt useradd -m -s /bin/fish " + user.Username).Run()
+		err = utils.NewCmd("arch-chroot /mnt useradd -m -s /bin/fish " + user.Username).Run()
 		if err != nil {
 			log.Fatalln(err.Error())
 		}
-		err = cmd.NewCmd(fmt.Sprintf(`arch-chroot /mnt sh -c "echo %s:%s | chpasswd"`, user.Username, user.Password)).Run()
+		err = utils.NewCmd(fmt.Sprintf(`arch-chroot /mnt sh -c "echo %s:%s | chpasswd"`, user.Username, user.Password)).Run()
 		if err != nil {
 			log.Fatalln(err.Error())
 		}
 	}
 
 	if cfg.BootLoader == "grub" {
-		err = cmd.NewCmd("arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB --removable").SetDesc("Creating grub bootloader...").Run()
+		err = utils.NewCmd("arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB --removable").SetDesc("Creating grub bootloader...").Run()
 		if err != nil {
 			log.Fatalln(err.Error())
 		}
 
-		err = cmd.NewCmd("arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg").SetDesc("Creating grub config...").Run()
+		err = utils.NewCmd("arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg").SetDesc("Creating grub config...").Run()
 		if err != nil {
 			log.Fatalln(err.Error())
 		}
 	} else if cfg.BootLoader == "systemd-boot" {
-		err = cmd.NewCmd("arch-chroot /mnt bootctl --path=/boot install").SetDesc("Creating bootloader...").Run()
+		err = utils.NewCmd("arch-chroot /mnt bootctl --path=/boot install").SetDesc("Creating bootloader...").Run()
 		if err != nil {
 			log.Fatalln(err.Error())
 		}
@@ -235,7 +234,7 @@ func main() {
 			log.Fatalln(err.Error())
 		}
 
-		uuid, err := cmd.NewCmd("findmnt -fn -o UUID " + cfg.InstallDisk + "2").SetDesc("Finding partition UUID...").Output()
+		uuid, err := utils.NewCmd("findmnt -fn -o UUID " + cfg.InstallDisk + "2").SetDesc("Finding partition UUID...").Output()
 		if err != nil {
 			log.Fatalln(err.Error())
 		}
@@ -246,14 +245,22 @@ func main() {
 		}
 	}
 
-	wheelContent := "%wheel\tALL=(ALL)\tALL\n"
-	fmt.Println("Writing sudoers.d file to enable wheel group...")
-	err = ioutil.WriteFile("/mnt/etc/sudoers.d/wheel", []byte(wheelContent), 0644)
+	err = utils.NewCmd("sed -i s/MODULES=()/MODULES=(btrfs)/ /mnt/etc/mkinitcpio.conf").Run()
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+	err = utils.NewCmd(`sed -i "s/HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)/HOOKS=(base udev keyboard autodetect modconf block filesystems fsck)/" /mnt/etc/mkinitcpio.conf`).Run()
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+	err = utils.NewCmd("arch-chroot /mnt mkinitcpio -p linux").Run()
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
 
-	err = cmd.NewCmd("arch-chroot /mnt /usr/bin/runuser -u " + cfg.Superusers[0].Username + " -- git clone https://aur.archlinux.org/paru-bin").Run()
+	wheelContent := "%wheel\tALL=(ALL)\tALL\n"
+	fmt.Println("Writing sudoers.d file to enable wheel group...")
+	err = ioutil.WriteFile("/mnt/etc/sudoers.d/wheel", []byte(wheelContent), 0644)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
@@ -263,12 +270,17 @@ func main() {
 		log.Fatalln(err.Error())
 	}
 
+	err = NewPostInstall(cfg).PerformPostInstall()
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
 	fmt.Println("Installation done. You will now be able to reboot.")
 }
 
 func EnableServices(cfg *sysconfig.SysConfig) error {
 	for _, service := range cfg.Services {
-		err := cmd.NewCmd("arch-chroot /mnt systemctl enable " + service).SetDesc("Enabling " + service + " service...").Run()
+		err := utils.NewCmd("arch-chroot /mnt systemctl enable " + service).SetDesc("Enabling " + service + " service...").Run()
 		if err != nil {
 			return err
 		}

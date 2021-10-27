@@ -1,27 +1,25 @@
 package main
 
-import (
-	"github.com/jiuncheng/archinstall2/cmd"
-)
+import "github.com/jiuncheng/archinstall2/utils"
 
 func RunPrerequisites() error {
 	// Prerequisite
-	err := cmd.NewCmd("timedatectl set-ntp true").SetDesc("Syncing datetime to ntp server...").Run()
+	err := utils.NewCmd("timedatectl set-ntp true").SetDesc("Syncing datetime to ntp server...").Run()
 	if err != nil {
 		return err
 	}
 
-	err = cmd.NewCmd("reflector -a 48 -c sg -f 5 -l 20 --verbose --sort rate --save /etc/pacman.d/mirrorlist").SetDesc("Finding fastest mirror...").Run()
+	err = utils.NewCmd("reflector -a 48 -c sg -f 5 -l 20 --verbose --sort rate --save /etc/pacman.d/mirrorlist").SetDesc("Finding fastest mirror...").Run()
 	if err != nil {
 		return err
 	}
 
-	err = cmd.NewCmd("sed -i s/^#Para/Para/ /etc/pacman.conf").SetDesc("Enabling parallel download..").Run()
+	err = utils.NewCmd("sed -i s/^#Para/Para/ /etc/pacman.conf").SetDesc("Enabling parallel download..").Run()
 	if err != nil {
 		return err
 	}
 
-	cmd.NewCmd("umount -a").SetDesc("Umounting all drives").Run()
+	utils.NewCmd("umount -a").SetDesc("Umounting all drives").Run()
 
 	return nil
 }

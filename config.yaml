@@ -25,7 +25,6 @@ pacstrap_pkg:
   - fish
 
 extra_pkg:
-  - vlc
   - bluez
   - bluez-utils
   - networkmanager
@@ -39,32 +38,33 @@ extra_pkg:
   - mtools
   - dosfstools
   - openssh
-  - rsync
-  - reflector
-  - virt-manager
-  - qemu
-  - qemu-arch-extra
-  - edk2-ovmf
-  - bridge-utils
-  - dnsmasq
-  - vde2
-  - openbsd-netcat
-  - iptables-nft
-  - ipset
   - firewalld
-  - flatpak
-  - ntfs-3g
-  - noto-fonts
-  - noto-fonts-cjk
-  - noto-fonts-emoji
-  - ttf-jetbrains-mono
-  - ttf-fira-code
-  - ttf-fira-mono
-  - ttf-fira-sans
-  - vivaldi
-  - vivaldi-ffmpeg-codecs
-  - neofetch
-  - htop
+  # - rsync
+  # - reflector
+  # - virt-manager
+  # - qemu
+  # - qemu-arch-extra
+  # - edk2-ovmf
+  # - bridge-utils
+  # - dnsmasq
+  # - vde2
+  # - openbsd-netcat
+  # - iptables-nft
+  # - ipset
+  # - flatpak
+  # - ntfs-3g
+  # - noto-fonts
+  # - noto-fonts-cjk
+  # - noto-fonts-emoji
+  # - ttf-jetbrains-mono
+  # - ttf-fira-code
+  # - ttf-fira-mono
+  # - ttf-fira-sans
+  # - vivaldi
+  # - vivaldi-ffmpeg-codecs
+  # - neofetch
+  # - htop
+  # - vlc
 
 intel_cpu_pkg:
   - intel-ucode
