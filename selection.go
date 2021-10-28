@@ -15,11 +15,6 @@ type Selection struct {
 	cfg *sysconfig.SysConfig
 }
 
-type Profile struct {
-	Name string
-	Desc string
-}
-
 func NewSelection(cfg *sysconfig.SysConfig) *Selection {
 	return &Selection{cfg: cfg}
 }
@@ -414,17 +409,11 @@ func (s *Selection) GPUSelection() {
 }
 
 func (s *Selection) ProfileSelection() {
-	var list []*Profile
-
-	for name, desc := range s.cfg.ProfileList {
-		newProfile := &Profile{Name: name, Desc: desc}
-		list = append(list, newProfile)
-	}
 
 	for {
 		fmt.Print("\n\n")
 		fmt.Println("-----Install Profile-----")
-		for i, profile := range list {
+		for i, profile := range s.cfg.ProfileList.Profiles {
 			fmt.Printf("%d. %s\n", i+1, profile.Desc)
 		}
 		fmt.Print("Select desktop environment : ")
@@ -435,11 +424,11 @@ func (s *Selection) ProfileSelection() {
 			continue
 		}
 
-		if res > len(list) || res < 1 {
+		if res > len(s.cfg.ProfileList.Profiles) || res < 1 {
 			continue
 		}
 
-		s.cfg.Profile = list[res-1].Name
+		s.cfg.Profile = s.cfg.ProfileList.Profiles[res-1].Name
 		fmt.Println(s.cfg.Profile)
 		break
 	}

@@ -14,7 +14,7 @@ type SysConfig struct {
 	Timezone     string
 	BootLoader   string
 	Profile      string
-	ProfileList  map[string]string
+	ProfileList  *ProfileList
 	Superusers   []User
 	Users        []User
 	Package      Package
@@ -40,4 +40,13 @@ type User struct {
 
 func NewSysConfig() *SysConfig {
 	return &SysConfig{}
+}
+
+type ProfileList struct {
+	Profiles []Profile `mapstructure:"profile"`
+}
+
+type Profile struct {
+	Name string `mapstructure:"name"`
+	Desc string `mapstructure:"desc"`
 }

@@ -24,7 +24,12 @@ func main() {
 	}
 
 	cfg := sysconfig.NewSysConfig()
-	cfg.ProfileList = globalConf.GetStringMapString("profile")
+	var list sysconfig.ProfileList
+	err = globalConf.UnmarshalKey("profile", &list)
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+	cfg.ProfileList = &list
 	cfg.Package.PacstrapPkg = globalConf.GetStringSlice("pacstrap_pkg")
 	cfg.Package.GrubPkg = globalConf.GetStringSlice("grub_pkg")
 	cfg.Package.IntelCPUPkg = globalConf.GetStringSlice("intel_cpu_pkg")
@@ -242,12 +247,12 @@ func main() {
 		log.Fatalln(err.Error())
 	}
 
-	err = EnableServices(cfg)
+	err = NewPostInstall(cfg).PerformPostInstall()
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
 
-	err = NewPostInstall(cfg).PerformPostInstall()
+	err = EnableServices(cfg)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}

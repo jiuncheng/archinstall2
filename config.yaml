@@ -1,8 +1,18 @@
 profile:
-  gnome: "default gnome"
-  plasma: "default plasma"
-  cutefish: "default cutefish"
-  default: "no desktop environment"
+  - name: "gnome"
+    desc: "default gnome"
+
+  - name: plasma
+    desc: "default plasma"
+
+  - name: cutefish
+    desc: "default cutefish"
+
+  - name: default
+    desc: "no desktop environment"
+
+  - name: custom
+    desc: "KDE Plasma with paru and zram"
 
 pacstrap_pkg:
   - base
