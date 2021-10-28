@@ -415,12 +415,14 @@ func (s *Selection) GPUSelection() {
 
 func (s *Selection) ProfileSelection() {
 	var list []*Profile
+	log.Println(s.cfg.ProfileList)
 
 	for name, desc := range s.cfg.ProfileList {
+		log.Println(name, desc)
 		newProfile := &Profile{Name: name, Desc: desc}
 		list = append(list, newProfile)
 	}
-
+	log.Println(list)
 	for {
 		fmt.Print("\n\n")
 		fmt.Println("-----Install Profile-----")
