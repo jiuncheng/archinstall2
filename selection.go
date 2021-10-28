@@ -15,6 +15,11 @@ type Selection struct {
 	cfg *sysconfig.SysConfig
 }
 
+type Profile struct {
+	Name string
+	Desc string
+}
+
 func NewSelection(cfg *sysconfig.SysConfig) *Selection {
 	return &Selection{cfg: cfg}
 }
@@ -38,7 +43,7 @@ func (s *Selection) PerformSelection() error {
 	s.OptionalUserSelection()
 	s.ProcessorSelection()
 	s.GPUSelection()
-	s.DesktopSelection()
+	s.ProfileSelection()
 
 	return nil
 }
@@ -408,35 +413,34 @@ func (s *Selection) GPUSelection() {
 	}
 }
 
-func (s *Selection) DesktopSelection() {
+func (s *Selection) ProfileSelection() {
+	var list []*Profile
+
+	for name, desc := range s.cfg.ProfileList {
+		newProfile := &Profile{Name: name, Desc: desc}
+		list = append(list, newProfile)
+	}
+
 	for {
 		fmt.Print("\n\n")
-		fmt.Println("-----Desktop GUI-----")
-		fmt.Println("1. gnome")
-		fmt.Println("2. plasma")
-		fmt.Println("3. cutefish")
-		fmt.Println("4. no desktop environment")
+		fmt.Println("-----Install Profile-----")
+		for i, profile := range list {
+			fmt.Printf("%d. %s", i+1, profile.Desc)
+		}
 		fmt.Print("Select desktop environment : ")
 
-		var res string
-		fmt.Scanln(&res)
-		if strings.TrimSpace(res) == "1" {
-			s.cfg.Desktop = "gnome"
-			fmt.Println(s.cfg.Desktop)
-			break
-		} else if strings.TrimSpace(res) == "2" {
-			s.cfg.Desktop = "plasma"
-			fmt.Println(s.cfg.Desktop)
-			break
-		} else if strings.TrimSpace(res) == "3" {
-			s.cfg.Desktop = "cutefish"
-			fmt.Println(s.cfg.Desktop)
-			break
-		} else if strings.TrimSpace(res) == "4" {
-			s.cfg.Desktop = "default"
-			fmt.Println(s.cfg.Desktop)
-			break
+		var res int
+		_, err := fmt.Scanln(&res)
+		if err != nil {
+			continue
 		}
-		continue
+
+		if res > len(list) || res < 1 {
+			continue
+		}
+
+		s.cfg.Profile = list[res-1].Name
+		fmt.Println(s.cfg.Profile)
+		break
 	}
 }

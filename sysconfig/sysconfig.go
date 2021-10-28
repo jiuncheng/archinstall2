@@ -13,7 +13,8 @@ type SysConfig struct {
 	Language     string
 	Timezone     string
 	BootLoader   string
-	Desktop      string
+	Profile      string
+	ProfileList  map[string]string
 	Superusers   []User
 	Users        []User
 	Package      Package

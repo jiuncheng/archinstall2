@@ -24,6 +24,7 @@ func main() {
 	}
 
 	cfg := sysconfig.NewSysConfig()
+	cfg.ProfileList = globalConf.GetStringMapString("profile")
 	cfg.Package.PacstrapPkg = globalConf.GetStringSlice("pacstrap_pkg")
 	cfg.Package.GrubPkg = globalConf.GetStringSlice("grub_pkg")
 	cfg.Package.IntelCPUPkg = globalConf.GetStringSlice("intel_cpu_pkg")
@@ -42,40 +43,16 @@ func main() {
 		log.Fatalln(err.Error())
 	}
 
-	if cfg.Desktop == "gnome" {
-		desktopConf := viper.New()
-		desktopConf.SetConfigName("gnome")
-		desktopConf.SetConfigType("yaml")
-		desktopConf.AddConfigPath("./desktop")
-		err = desktopConf.ReadInConfig()
-		if err != nil {
-			panic(fmt.Errorf("fatal error config file: %w", err))
-		}
-		cfg.Package.DesktopPkg = desktopConf.GetStringSlice("desktop_pkg")
-		cfg.Services = desktopConf.GetStringSlice("services")
-	} else if cfg.Desktop == "plasma" {
-		desktopConf := viper.New()
-		desktopConf.SetConfigName("plasma")
-		desktopConf.SetConfigType("yaml")
-		desktopConf.AddConfigPath("./desktop")
-		err = desktopConf.ReadInConfig()
-		if err != nil {
-			panic(fmt.Errorf("fatal error config file: %w", err))
-		}
-		cfg.Package.DesktopPkg = desktopConf.GetStringSlice("desktop_pkg")
-		cfg.Services = desktopConf.GetStringSlice("services")
-	} else if cfg.Desktop == "cutefish" {
-		desktopConf := viper.New()
-		desktopConf.SetConfigName("cutefish")
-		desktopConf.SetConfigType("yaml")
-		desktopConf.AddConfigPath("./desktop")
-		err = desktopConf.ReadInConfig()
-		if err != nil {
-			panic(fmt.Errorf("fatal error config file: %w", err))
-		}
-		cfg.Package.DesktopPkg = desktopConf.GetStringSlice("desktop_pkg")
-		cfg.Services = desktopConf.GetStringSlice("services")
+	desktopConf := viper.New()
+	desktopConf.SetConfigName(cfg.Profile)
+	desktopConf.SetConfigType("yaml")
+	desktopConf.AddConfigPath("./desktop")
+	err = desktopConf.ReadInConfig()
+	if err != nil {
+		panic(fmt.Errorf("fatal error config file: %w", err))
 	}
+	cfg.Package.DesktopPkg = desktopConf.GetStringSlice("desktop_pkg")
+	cfg.Services = desktopConf.GetStringSlice("services")
 
 	err = utils.NewDiskUtil(cfg).CreateBTRFS()
 	if err != nil {
