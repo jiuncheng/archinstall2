@@ -11,6 +11,11 @@ desktop_pkg:
   - elisa
   - dragon
 
+postinstall:
+  - name: "Git clone Paru"
+  - run: ""
+  - target: user
+
 services:
   - NetworkManager
   - bluetooth
@@ -18,5 +23,3 @@ services:
   - cups
   - sshd
   - sddm
-
-postinstall:
