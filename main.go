@@ -46,7 +46,7 @@ func main() {
 	desktopConf := viper.New()
 	desktopConf.SetConfigName(cfg.Profile)
 	desktopConf.SetConfigType("yaml")
-	desktopConf.AddConfigPath("./desktop")
+	desktopConf.AddConfigPath("./profile")
 	err = desktopConf.ReadInConfig()
 	if err != nil {
 		panic(fmt.Errorf("fatal error config file: %w", err))

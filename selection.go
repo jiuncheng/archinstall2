@@ -425,7 +425,7 @@ func (s *Selection) ProfileSelection() {
 		fmt.Print("\n\n")
 		fmt.Println("-----Install Profile-----")
 		for i, profile := range list {
-			fmt.Printf("%d. %s", i+1, profile.Desc)
+			fmt.Printf("%d. %s\n", i+1, profile.Desc)
 		}
 		fmt.Print("Select desktop environment : ")
 
