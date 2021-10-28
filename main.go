@@ -25,13 +25,10 @@ func main() {
 
 	cfg := sysconfig.NewSysConfig()
 	var list sysconfig.ProfileList
-	log.Println("asdasd")
-	err = globalConf.UnmarshalKey("profile", &list)
+	err = globalConf.UnmarshalKey("profiles", &list)
 	if err != nil {
-		log.Println("asdasd2")
 		log.Fatalln(err.Error())
 	}
-	log.Println("asdasd3")
 	cfg.ProfileList = &list
 	cfg.Package.PacstrapPkg = globalConf.GetStringSlice("pacstrap_pkg")
 	cfg.Package.GrubPkg = globalConf.GetStringSlice("grub_pkg")

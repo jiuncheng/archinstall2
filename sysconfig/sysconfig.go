@@ -47,6 +47,6 @@ type ProfileList struct {
 }
 
 type Profile struct {
-	Name string `mapstructure:"name"`
-	Desc string `mapstructure:"desc"`
+	Name string
+	Desc string
 }

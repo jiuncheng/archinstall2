@@ -1,4 +1,4 @@
-profile:
+profiles:
   - name: "gnome"
     desc: "default gnome"
 
