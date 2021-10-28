@@ -43,7 +43,7 @@ func NewSysConfig() *SysConfig {
 }
 
 type ProfileList struct {
-	Profiles []Profile `mapstructure:"profile"`
+	Profiles []Profile
 }
 
 type Profile struct {
