@@ -1,8 +1,8 @@
 profile:
-  - gnome: "default gnome"
-  - plasma: "default plasma"
-  - cutefish: "default cutefish"
-  - default: "no desktop environment"
+  gnome: "default gnome"
+  plasma: "default plasma"
+  cutefish: "default cutefish"
+  default: "no desktop environment"
 
 pacstrap_pkg:
   - base
