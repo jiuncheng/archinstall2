@@ -413,7 +413,7 @@ func (s *Selection) ProfileSelection() {
 	for {
 		fmt.Print("\n\n")
 		fmt.Println("-----Install Profile-----")
-		for i, profile := range s.cfg.ProfileList.Profiles {
+		for i, profile := range s.cfg.ProfileList {
 			fmt.Printf("%d. %s\n", i+1, profile.Desc)
 		}
 		fmt.Print("Select desktop environment : ")
@@ -424,11 +424,11 @@ func (s *Selection) ProfileSelection() {
 			continue
 		}
 
-		if res > len(s.cfg.ProfileList.Profiles) || res < 1 {
+		if res > len(s.cfg.ProfileList) || res < 1 {
 			continue
 		}
 
-		s.cfg.Profile = s.cfg.ProfileList.Profiles[res-1].Name
+		s.cfg.Profile = s.cfg.ProfileList[res-1].Name
 		fmt.Println(s.cfg.Profile)
 		break
 	}

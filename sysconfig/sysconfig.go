@@ -14,11 +14,14 @@ type SysConfig struct {
 	Timezone     string
 	BootLoader   string
 	Profile      string
-	ProfileList  *ProfileList
-	Superusers   []User
-	Users        []User
-	Package      Package
-	Services     []string
+	ProfileList  []struct {
+		Name string
+		Desc string
+	}
+	Superusers []User
+	Users      []User
+	Package    Package
+	Services   []string
 }
 
 type Package struct {

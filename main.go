@@ -24,12 +24,15 @@ func main() {
 	}
 
 	cfg := sysconfig.NewSysConfig()
-	var list sysconfig.ProfileList
+	var list []struct {
+		Name string
+		Desc string
+	}
 	err = globalConf.UnmarshalKey("profiles", &list)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
-	cfg.ProfileList = &list
+	cfg.ProfileList = list
 	cfg.Package.PacstrapPkg = globalConf.GetStringSlice("pacstrap_pkg")
 	cfg.Package.GrubPkg = globalConf.GetStringSlice("grub_pkg")
 	cfg.Package.IntelCPUPkg = globalConf.GetStringSlice("intel_cpu_pkg")
