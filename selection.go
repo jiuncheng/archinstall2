@@ -21,11 +21,11 @@ func NewSelection(cfg *sysconfig.SysConfig) *Selection {
 
 func (s *Selection) PerformSelection() error {
 	s.DiskSelection()
-	// err := s.LayoutSelection()
-	// if err != nil {
-	// 	return err
-	// }
-	err := s.TimezoneSelection()
+	err := s.LayoutSelection()
+	if err != nil {
+		return err
+	}
+	err = s.TimezoneSelection()
 	if err != nil {
 		return err
 	}
@@ -77,33 +77,29 @@ func (s *Selection) DiskSelection() {
 }
 
 func (s *Selection) LayoutSelection() error {
-	s.cfg.KBLayout = "us"
-	return nil
-	// for {
-	// 	out, err := exec.Command("localectl", "list-keymaps").Output()
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// 	fmt.Println(string(out))
-	// 	fmt.Print("Select one of the following keyboard layout or skip (default: us) : ")
-	// 	var res string
-	// 	fmt.Scanln(&res)
+	out, err := exec.Command("localectl", "list-keymaps").Output()
+	if err != nil {
+		return err
+	}
+	fmt.Println(string(out))
+	fmt.Print("Select one of the following keyboard layout or skip (default: us) : ")
+	var res string
+	fmt.Scanln(&res)
 
-	// 	if strings.TrimSpace(res) == "us" || strings.TrimSpace(res) == "" {
-	// 		s.cfg.KBLayout = strings.TrimSpace("us")
-	// 	} else {
-	// 		s.cfg.KBLayout = strings.TrimSpace(res)
-	// 	}
+	if strings.TrimSpace(res) == "us" || strings.TrimSpace(res) == "" {
+		s.cfg.KBLayout = strings.TrimSpace("us")
+	} else {
+		s.cfg.KBLayout = strings.TrimSpace(res)
+	}
 
-	// 	err = exec.Command("localectl", "set-keymap", s.cfg.KBLayout).Run()
-	// 	if err != nil {
-	// 		fmt.Print("Keymap is invalid. Press enter to select again : ")
-	// 		fmt.Scanln()
-	// 		continue
-	// 	}
-	// 	fmt.Println(s.cfg.KBLayout)
-	// 	return nil
+	// err = exec.Command("localectl", "set-keymap", s.cfg.KBLayout).Run()
+	// if err != nil {
+	// 	fmt.Print("Keymap is invalid. Press enter to select again : ")
+	// 	fmt.Scanln()
+	// 	continue
 	// }
+	fmt.Println(s.cfg.KBLayout)
+	return nil
 }
 
 func (s *Selection) TimezoneSelection() error {
